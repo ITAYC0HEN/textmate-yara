@@ -5,10 +5,14 @@
 			"/*",
 			"\tRULE DESCRIPTION HERE",
 			"*/",
-			"rule ${name}",
-			"{",
+			"rule ${1:$TM_FILENAME_BASE}",
+            "{",
+            "\tmeta:",
+            "\t\t${2:metadata}",
+            "\tstrings:",
+            "\t\t${3:string}",
 			"\tcondition:",
-			"\t\t$1",
+			"\t\t${4:condition}",
 			"}"
 		],
 		"description": "Generate a basic skeleton"
@@ -25,7 +29,7 @@
 		"prefix": "strings",
 		"body": [
 			"strings:",
-			"\t${string(s)}"
+			"\t${strings}"
 		],
 		"description": "Generate a 'strings' section"
 	},
