@@ -20,11 +20,11 @@ export function CompileRule(doc: vscode.TextDocument) {
         return new Promise((resolve, reject) => { null; });
     }
     doc = editor.document;
-    let flags = [doc.fileName, ""];
+    let flags = [doc.fileName, "~\.yara_temp.bin"];
     let diagnostics: Array<vscode.Diagnostic> = [];
 
     return new Promise((resolve, reject) => {
-        const result: proc.ChildProcess = proc.spawn("yarac");
+        const result: proc.ChildProcess = proc.spawn("yarac", flags);
         console.log(`Attempting to compile ${doc.fileName}`);
         let errors: string | null = null;
         let diagnostic_errors: number = 0;
@@ -103,15 +103,15 @@ function GetRuleRange(lines: string[], symbol: vscode.Position) {
 */
 function ParseOutput(line: string, doc: vscode.TextDocument) {
     try {
+        console.log(line);
         // regex to match line number in resulting YARAC output
         const pattern: RegExp = RegExp("\\([0-9]+\\)");
         let parsed: Array<string> = line.trim().split(": ");
-        // dunno why this adds one to the result - for some reason the render is off by a line
         let matches: RegExpExecArray = pattern.exec(parsed[0]);
         let severity: vscode.DiagnosticSeverity = parsed[1] == "error" ? vscode.DiagnosticSeverity.Error : vscode.DiagnosticSeverity.Warning;
         if (matches != null) {
             // remove the surrounding parentheses
-            let line_no: number = parseInt(matches[0].replace("(", "").replace(")", "")) - 1;
+            let line_no: number = parseInt(matches[0].replace("(", "").replace(")", "")) - 2;
             let start: vscode.Position = new vscode.Position(line_no, doc.lineAt(line_no).firstNonWhitespaceCharacterIndex);
             let end: vscode.Position = new vscode.Position(line_no, Number.MAX_VALUE);
             let line_range: vscode.Range = new vscode.Range(start, end);
