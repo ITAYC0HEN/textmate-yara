@@ -1,17 +1,74 @@
 "use strict";
 
+import * as proc from "child_process";
+import * as tmp from "tempfile";
 import * as vscode from "vscode";
 
 
 // variables have a few possible first characters - use these to identify vars vs. rules
 const varFirstChar: Set<string> = new Set(["$", "#", "@", "!"]);
+let diagnosticCollection: vscode.DiagnosticCollection;
+
+/*
+    Compile the current file in the VSCode workspace as a YARA rule
+*/
+export function CompileRule(doc: vscode.TextDocument) {
+    const editor: vscode.TextEditor = vscode.window.activeTextEditor;
+    if (!editor) {
+        vscode.window.showErrorMessage("Couldn't get the active text editor");
+        console.log("Couldn't get the text editor");
+        return new Promise((resolve, reject) => { null; });
+    }
+    doc = editor.document;
+    let flags = [doc.fileName, ""];
+    let diagnostics: Array<vscode.Diagnostic> = [];
+
+    return new Promise((resolve, reject) => {
+        const result: proc.ChildProcess = proc.spawn("yarac");
+        console.log(`Attempting to compile ${doc.fileName}`);
+        let errors: string | null = null;
+        let diagnostic_errors: number = 0;
+        result.stderr.on('data', (data) => {
+            data.toString().split("\n").forEach(line => {
+                let current: vscode.Diagnostic | null = ParseOutput(line, doc);
+                if (current != null) {
+                    diagnostics.push(current);
+                    if (current.severity == vscode.DiagnosticSeverity.Error) {
+                        // track how many Error diagnostics there are to determine if file compiled or not later
+                        diagnostic_errors++;
+                    }
+                }
+                else if (line.startsWith("unknown option")) {
+                    vscode.window.showErrorMessage(line);
+                    console.log(`[Error] ${line}`);
+                    errors = line;
+                }
+            });
+        });
+        result.on("error", (err) => {
+            errors = err.message.endsWith("ENOENT") ? "Cannot compile YARA rule. Please specify an install path" : `Error: ${err.message}`;
+            vscode.window.showErrorMessage(errors);
+            console.log(`[CompileRuleError] ${errors}`);
+            reject(errors);
+        });
+        result.on("close", (code) => {
+            diagnosticCollection.set(vscode.Uri.file(doc.fileName), diagnostics);
+            if (diagnostic_errors == 0 && errors == null) {
+                // status bar message goes away after 3 seconds
+                vscode.window.setStatusBarMessage("File compiled successfully!", 3000);
+                console.log("File compiled successfully!");
+            }
+            resolve(diagnostics);
+        });
+    });
+}
 
 /*
     Get the start and end boundaries for the current YARA rule based on a symbol's position
 */
 function GetRuleRange(lines: string[], symbol: vscode.Position) {
-    let begin: vscode.Position|null = null;
-    let end: vscode.Position|null = null;
+    let begin: vscode.Position | null = null;
+    let end: vscode.Position | null = null;
     const startRuleRegexp = RegExp("^rule ");
     const endRuleRegexp = RegExp("^\}");
     // find the nearest reference to "rule" by traversing the lines in reverse order
@@ -48,13 +105,12 @@ function ParseOutput(line: string, doc: vscode.TextDocument) {
     try {
         // regex to match line number in resulting YARAC output
         const pattern: RegExp = RegExp("\\([0-9]+\\)");
-        let parsed:Array<string> = line.trim().split(": ");
+        let parsed: Array<string> = line.trim().split(": ");
         // dunno why this adds one to the result - for some reason the render is off by a line
         let matches: RegExpExecArray = pattern.exec(parsed[0]);
         let severity: vscode.DiagnosticSeverity = parsed[1] == "error" ? vscode.DiagnosticSeverity.Error : vscode.DiagnosticSeverity.Warning;
         if (matches != null) {
             // remove the surrounding parentheses
-            // VSCode render is off by one, and I'm not sure why. Have to subtract one to *generally* get the correct line
             let line_no: number = parseInt(matches[0].replace("(", "").replace(")", "")) - 1;
             let start: vscode.Position = new vscode.Position(line_no, doc.lineAt(line_no).firstNonWhitespaceCharacterIndex);
             let end: vscode.Position = new vscode.Position(line_no, Number.MAX_VALUE);
@@ -73,7 +129,7 @@ function ParseOutput(line: string, doc: vscode.TextDocument) {
 export class YaraDefinitionProvider implements vscode.DefinitionProvider {
     public provideDefinition(doc: vscode.TextDocument, pos: vscode.Position, token: vscode.CancellationToken): Thenable<vscode.Location> {
         return new Promise((resolve, reject) => {
-            let definition: vscode.Location|null = null;
+            let definition: vscode.Location | null = null;
             const fileUri: vscode.Uri = vscode.Uri.file(doc.fileName);
             const range: vscode.Range = doc.getWordRangeAtPosition(pos);
             const symbol: string = doc.getText(range);
@@ -171,8 +227,12 @@ export function activate(context: vscode.ExtensionContext) {
     let YARA: vscode.DocumentSelector = { language: "yara", scheme: "file" };
     let definitionDisposable: vscode.Disposable = vscode.languages.registerDefinitionProvider(YARA, new YaraDefinitionProvider());
     let referenceDisposable: vscode.Disposable = vscode.languages.registerReferenceProvider(YARA, new YaraReferenceProvider());
+    let saveSubscription = vscode.workspace.onDidSaveTextDocument(() => { CompileRule(null) });
+    diagnosticCollection = vscode.languages.createDiagnosticCollection('yara');
     context.subscriptions.push(definitionDisposable);
     context.subscriptions.push(referenceDisposable);
+    context.subscriptions.push(saveSubscription);
+    context.subscriptions.push(diagnosticCollection);
 };
 
 export function deactivate(context: vscode.ExtensionContext) {
