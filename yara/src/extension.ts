@@ -32,6 +32,44 @@ function GetRuleRange(lines: string[], symbol: vscode.Position) {
     return new vscode.Range(begin, end);
 }
 
+/*
+    Parse YARA STDERR output and create Diagnostics for the window
+    :line: The YARA command's current output line
+    :doc: The current workspace document to draw diagnostics data on
+
+    yara.exe .\test\rules\compile_fail.yara .\file.txt
+    .\test\rules\compile_fail.yara(9): error: unterminated string
+    .\test\rules\compile_fail.yara(9): error: syntax error, unexpected $end, expecting _TEXT_STRING_
+
+    yara.exe .\test\rules\compile_warn.yara .\file.txt
+    .\test\rules\compile_warn.yara(10): warning: Using deprecated "entrypoint" keyword. Use the "entry_point" function from PE module instead.
+*/
+function ParseOutput(line: string, doc: vscode.TextDocument) {
+    try {
+        // regex to match line number in resulting YARAC output
+        const pattern: RegExp = RegExp("\\([0-9]+\\)");
+        let parsed:Array<string> = line.trim().split(": ");
+        // dunno why this adds one to the result - for some reason the render is off by a line
+        let matches: RegExpExecArray = pattern.exec(parsed[0]);
+        let severity: vscode.DiagnosticSeverity = parsed[1] == "error" ? vscode.DiagnosticSeverity.Error : vscode.DiagnosticSeverity.Warning;
+        if (matches != null) {
+            // remove the surrounding parentheses
+            // VSCode render is off by one, and I'm not sure why. Have to subtract one to *generally* get the correct line
+            let line_no: number = parseInt(matches[0].replace("(", "").replace(")", "")) - 1;
+            let start: vscode.Position = new vscode.Position(line_no, doc.lineAt(line_no).firstNonWhitespaceCharacterIndex);
+            let end: vscode.Position = new vscode.Position(line_no, Number.MAX_VALUE);
+            let line_range: vscode.Range = new vscode.Range(start, end);
+            return new vscode.Diagnostic(line_range, parsed.pop(), severity);
+        }
+        return null;
+    }
+    catch (error) {
+        vscode.window.showErrorMessage(error);
+        console.log(`[ConvertStderrToDiagnosticError] ${error}`);
+        return null;
+    }
+}
+
 export class YaraDefinitionProvider implements vscode.DefinitionProvider {
     public provideDefinition(doc: vscode.TextDocument, pos: vscode.Position, token: vscode.CancellationToken): Thenable<vscode.Location> {
         return new Promise((resolve, reject) => {
