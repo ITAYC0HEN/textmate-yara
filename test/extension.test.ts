@@ -152,3 +152,26 @@ suite("YARA: Provider", function () {
         });
     });
 });
+
+suite("YARA: Diagnostics", function() {
+    test("compile success", function (done) {
+        const filepath: string = path.join(workspace, "compile_success.yara");
+        vscode.workspace.openTextDocument(filepath).then(function (doc) {
+            // pass
+        });
+    });
+
+    test("compile fail", function (done) {
+        const filepath: string = path.join(workspace, "compile_fail.yara");
+        vscode.workspace.openTextDocument(filepath).then(function (doc) {
+            // pass
+        });
+    });
+
+    test("compile warning", function (done) {
+        const filepath: string = path.join(workspace, "compile_warn.yara");
+        vscode.workspace.openTextDocument(filepath).then(function (doc) {
+            // pass
+        });
+    });
+});
