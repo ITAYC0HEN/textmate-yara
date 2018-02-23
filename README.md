@@ -9,21 +9,36 @@ Currently, Snippets support includes:
 * `strings:` section skeleton
 * `meta:` section skeleton
 
-## Screenshot
-![Image as of 04 Sept 2016](./images/04092016.PNG)
-
 ## Features
+
+### Syntax Highlighting
+<img src="./images/04092016.PNG" width=40% alt="Image as of 04 Sept 2016">
+
+### Diagnostics
+If the `yarac` tool is installed locally, this extension can draw diagnotics (red & green squigglies) directly onto rules
+
+<img src="./images/diagnostic_warn.PNG" width="60%" alt="Diagnostics">
+
+By default, diagnostics are redrawn on each file save, but this can be turned off with the configuration setting
+```
+"yara.compileOnSave": "off"
+```
+
+The `yarac` tool is assumed to be in the local $PATH by default, but a custom path can be provided with the configuration setting
+```
+"yara.installPath": "<directory_storing_binary>"
+```
 
 ### Definition Provider and Peeking
 Allows peeking and Ctrl+clicking to jump to a rule definition.
 This only applies to rule names at the moment, but variables are in the works
 
-![Go To Definition](./images/peek_rules.PNG)
+<img src="./images/peek_rules.PNG" width="60%" alt="Go To Definition">
 
 ### Reference Provider
 Shows the locations of a given symbol (rule name, variable, constant, etc.)
 
-![Find All References](./images/references.PNG)
+<img src="./images/references.PNG" width="60%" alt="Find All References">
 
 ## Problems?
 If you encounter an issue with the syntax, feel free to create an issue or pull request!
