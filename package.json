@@ -66,9 +66,14 @@
         "postinstall": "node ./node_modules/vscode/bin/install",
         "test": "mocha"
     },
-    "dependencies": {
+    "devDependencies": {
         "child_process": "^1.0.2",
         "path": "^0.12.7",
-        "vscode": "^1.1.10"
+        "tempy": "^0.2.1",
+        "typescript": "^2.7.2",
+        "vscode": "^1.1.10",
+        "mocha": "^2.3.3",
+        "@types/node": "^6.0.40",
+        "@types/mocha": "^2.2.32"
     }
 }
