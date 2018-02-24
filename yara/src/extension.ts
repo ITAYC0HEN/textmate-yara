@@ -51,7 +51,7 @@ export function CompileRule(doc: vscode.TextDocument | null) {
         result.on("error", (err) => {
             errors = err.message.endsWith("ENOENT") ? "Cannot compile YARA rule. Please specify an install path" : `Error: ${err.message}`;
             vscode.window.showErrorMessage(errors);
-            console.log(`[CompileRuleError] ${errors}`);
+            console.log(errors);
             reject(errors);
         });
         result.on("close", (code) => {
@@ -123,7 +123,7 @@ function ParseOutput(line: string, doc: vscode.TextDocument) {
     }
     catch (error) {
         vscode.window.showErrorMessage(error);
-        console.log(`[ConvertStderrToDiagnosticError] ${error}`);
+        console.log(error);
         return null;
     }
 }
