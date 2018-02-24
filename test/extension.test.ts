@@ -157,21 +157,47 @@ suite("YARA: Diagnostics", function() {
     test("compile success", function (done) {
         const filepath: string = path.join(workspace, "compile_success.yara");
         vscode.workspace.openTextDocument(filepath).then(function (doc) {
-            // pass
+            yara.CompileRule(doc).then(function (diagnostics: Array<vscode.Diagnostic>) {
+                if (diagnostics.length == 0) {
+                    done();
+                }
+            });
         });
     });
 
     test("compile fail", function (done) {
         const filepath: string = path.join(workspace, "compile_fail.yara");
         vscode.workspace.openTextDocument(filepath).then(function (doc) {
-            // pass
+            yara.CompileRule(doc).then(function (diagnostics: Array<vscode.Diagnostic>) {
+                let passed: boolean = false;
+                if (diagnostics.length == 2 ) {
+                    diagnostics.forEach(function(diagnostic) {
+                        if (diagnostic.severity == vscode.DiagnosticSeverity.Error) {
+                            if (diagnostic.range.start.line == 8 && diagnostic.range.end.line == 8) {
+                                passed = true;
+                                return;
+                            }
+                        }
+                        passed = false;
+                    });
+                }
+                if (passed) { done(); }
+            });
         });
     });
 
     test("compile warning", function (done) {
         const filepath: string = path.join(workspace, "compile_warn.yara");
         vscode.workspace.openTextDocument(filepath).then(function (doc) {
-            // pass
+            yara.CompileRule(doc).then(function (diagnostics: Array<vscode.Diagnostic>) {
+                if (diagnostics.length == 1) {
+                    if (diagnostics[0].severity == vscode.DiagnosticSeverity.Warning) {
+                        if (diagnostics[0].range.start.line == 9 && diagnostics[0].range.end.line == 9) {
+                            done();
+                        }
+                    }
+                }
+            });
         });
     });
 });
