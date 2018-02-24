@@ -12,21 +12,23 @@ let diagnosticCollection: vscode.DiagnosticCollection;
 /*
     Compile the current file in the VSCode workspace as a YARA rule
 */
-export function CompileRule(doc: vscode.TextDocument) {
-    const editor: vscode.TextEditor = vscode.window.activeTextEditor;
-    if (!editor) {
-        vscode.window.showErrorMessage("Couldn't get the active text editor");
-        console.log("Couldn't get the text editor");
-        return new Promise((resolve, reject) => { null; });
+export function CompileRule(doc: vscode.TextDocument | null) {
+    if (!doc) {
+        const editor: vscode.TextEditor = vscode.window.activeTextEditor;
+        if (!editor) {
+            vscode.window.showErrorMessage("Couldn't get the active text editor");
+            console.log("Couldn't get the text editor");
+            return new Promise((resolve, reject) => { null; });
+        }
+        doc = editor.document;
     }
-    doc = editor.document;
-    let ofile = tmp.file({name: "yarac.tmp"});
+    let ofile = tmp.file({ name: "yarac.tmp" });
     let flags = [doc.fileName, ofile];
     let diagnostics: Array<vscode.Diagnostic> = [];
 
     return new Promise((resolve, reject) => {
         const result: proc.ChildProcess = proc.spawn("yarac", flags);
-        console.log(`Attempting to compile ${doc.fileName}`);
+        // console.log(`Attempting to compile ${doc.fileName}`);
         let errors: string | null = null;
         let diagnostic_errors: number = 0;
         result.stderr.on('data', (data) => {
@@ -57,7 +59,7 @@ export function CompileRule(doc: vscode.TextDocument) {
             if (diagnostic_errors == 0 && errors == null) {
                 // status bar message goes away after 3 seconds
                 vscode.window.setStatusBarMessage("File compiled successfully!", 3000);
-                console.log("File compiled successfully!");
+                // console.log("File compiled successfully!");
             }
             resolve(diagnostics);
         });
@@ -104,7 +106,6 @@ function GetRuleRange(lines: string[], symbol: vscode.Position) {
 */
 function ParseOutput(line: string, doc: vscode.TextDocument) {
     try {
-        console.log(line);
         // regex to match line number in resulting YARAC output
         const pattern: RegExp = RegExp("\\([0-9]+\\)");
         let parsed: Array<string> = line.trim().split(": ");
