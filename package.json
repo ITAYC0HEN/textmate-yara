@@ -25,6 +25,33 @@
         "Snippets"
     ],
     "contributes": {
+        "configuration": [
+            {
+                "title": "YARA configuration",
+                "properties": {
+                    "yara.compileOnSave": {
+                        "type": "boolean",
+                        "default": true,
+                        "description": "Compile the active rule on each save and draw diagnostics on screen"
+                    },
+                    "yara.installPath": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "default": null,
+                        "description": "Path to the 'yarac' executable"
+                    }
+                }
+            }
+        ],
+        "grammars": [
+            {
+                "language": "yara",
+                "scopeName": "source.yara",
+                "path": "yara/syntaxes/yara.tmLanguage"
+            }
+        ],
         "languages": [
             {
                 "id": "yara",
@@ -40,13 +67,6 @@
                     ".yar"
                 ],
                 "configuration": "yara/yara.configuration.json"
-            }
-        ],
-        "grammars": [
-            {
-                "language": "yara",
-                "scopeName": "source.yara",
-                "path": "yara/syntaxes/yara.tmLanguage"
             }
         ],
         "snippets": [
