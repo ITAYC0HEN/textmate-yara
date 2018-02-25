@@ -29,6 +29,15 @@
             {
                 "title": "YARA configuration",
                 "properties": {
+                    "yara.compileFlags": {
+                        "type": [
+                            "array",
+                            "string",
+                            "null"
+                        ],
+                        "default": null,
+                        "description": "Flags to pass to the 'yarac' compiler"
+                    },
                     "yara.compileOnSave": {
                         "type": "boolean",
                         "default": true,
