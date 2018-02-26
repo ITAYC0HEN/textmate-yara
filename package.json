@@ -31,7 +31,6 @@
                 "properties": {
                     "yara.compileFlags": {
                         "type": [
-                            "array",
                             "string",
                             "null"
                         ],
