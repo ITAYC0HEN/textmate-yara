@@ -8,6 +8,7 @@ import * as vscode from "vscode";
 // variables have a few possible first characters - use these to identify vars vs. rules
 const varFirstChar: Set<string> = new Set(["$", "#", "@", "!"]);
 let diagnosticCollection: vscode.DiagnosticCollection;
+let config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("yara");
 
 /*
     Compile the current file in the VSCode workspace as a YARA rule
@@ -22,13 +23,22 @@ export function CompileRule(doc: vscode.TextDocument | null) {
         }
         doc = editor.document;
     }
+    // use user's installation path if one exists, else assume "yarac" is available in the $PATH
+    let compilerPath: string = config.get("installPath") !== null ? `${config.get("installPath")}/yarac` : "yarac";
+    let compileFlags: string | null | Array<string> = config.get("compileFlags");
     let ofile = tmp.file({ name: "yarac.tmp" });
-    let flags = [doc.fileName, ofile];
+    let flags: Array<string>;
+    if (compileFlags && typeof compileFlags === "string") {
+        flags = [compileFlags, doc.fileName, ofile];
+    }
+    else {
+        flags = [doc.fileName, ofile];
+    }
     let diagnostics: Array<vscode.Diagnostic> = [];
 
     return new Promise((resolve, reject) => {
-        const result: proc.ChildProcess = proc.spawn("yarac", flags);
-        // console.log(`Attempting to compile ${doc.fileName}`);
+        const result: proc.ChildProcess = proc.spawn(compilerPath, flags);
+        // console.log(`Attempting to compile ${doc.fileName} with flags: ${flags}`);
         let errors: string | null = null;
         let diagnostic_errors: number = 0;
         result.stderr.on('data', (data) => {
@@ -229,11 +239,13 @@ export function activate(context: vscode.ExtensionContext) {
     let YARA: vscode.DocumentSelector = { language: "yara", scheme: "file" };
     let definitionDisposable: vscode.Disposable = vscode.languages.registerDefinitionProvider(YARA, new YaraDefinitionProvider());
     let referenceDisposable: vscode.Disposable = vscode.languages.registerReferenceProvider(YARA, new YaraReferenceProvider());
-    let saveSubscription = vscode.workspace.onDidSaveTextDocument(() => { CompileRule(null) });
+    let saveSubscription = vscode.workspace.onDidSaveTextDocument(() => { CompileRule(null); });
+    let configSubscription = vscode.workspace.onDidChangeConfiguration(() => { config = vscode.workspace.getConfiguration("yara"); });
     diagnosticCollection = vscode.languages.createDiagnosticCollection('yara');
     context.subscriptions.push(definitionDisposable);
     context.subscriptions.push(referenceDisposable);
     context.subscriptions.push(saveSubscription);
+    context.subscriptions.push(configSubscription);
     context.subscriptions.push(diagnosticCollection);
 };
 
