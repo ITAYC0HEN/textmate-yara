@@ -201,3 +201,19 @@ suite("YARA: Diagnostics", function() {
         });
     });
 });
+
+suite("YARA: Configuration", function() {
+    test.skip("installPath", function (done) {
+        const filepath: string = path.join(workspace, "compile_fail.yara");
+        vscode.workspace.openTextDocument(filepath).then(function (doc) {
+            // pass
+        });
+    });
+
+    test.skip("compileFlags", function (done) {
+        const filepath: string = path.join(workspace, "compile_warn.yara");
+        vscode.workspace.openTextDocument(filepath).then(function (doc) {
+            // pass
+        });
+    });
+});
