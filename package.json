@@ -95,13 +95,13 @@
         "test": "mocha"
     },
     "devDependencies": {
+        "@types/mocha": "^2.2.32",
+        "@types/node": "^6.0.102",
         "child_process": "^1.0.2",
+        "mocha": "^2.3.3",
         "path": "^0.12.7",
         "tempy": "^0.2.1",
         "typescript": "^2.7.2",
-        "vscode": "^1.1.10",
-        "mocha": "^2.3.3",
-        "@types/node": "^6.0.40",
-        "@types/mocha": "^2.2.32"
+        "vscode": "^1.1.14"
     }
 }
