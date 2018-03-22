@@ -75,7 +75,7 @@ suite("YARA: Provider", function () {
             // $dstring: Line 22, Col 11
             let pos: vscode.Position = new vscode.Position(21, 11);
             // console.log(`search term: ${doc.getText(doc.getWordRangeAtPosition(pos))}`);
-            let ctx: vscode.ReferenceContext|null = null;
+            let ctx: vscode.ReferenceContext | null = null;
             let tokenSource: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
             let results = refProvider.provideReferences(doc, pos, ctx, tokenSource.token);
             let passed: boolean = true;
@@ -89,7 +89,7 @@ suite("YARA: Provider", function () {
                 if (passed) { done(); }
             }
             else if (results instanceof Promise) {
-                results.then(function(references) {
+                results.then(function (references) {
                     if (references.length != 3) {
                         passed = false;
                     }
@@ -121,7 +121,7 @@ suite("YARA: Provider", function () {
             // $hex_string: Line 20, Col 11
             let pos: vscode.Position = new vscode.Position(19, 11);
             // console.log(`search term: ${doc.getText(doc.getWordRangeAtPosition(pos))}`);
-            let ctx: vscode.ReferenceContext|null = null;
+            let ctx: vscode.ReferenceContext | null = null;
             let tokenSource: vscode.CancellationTokenSource = new vscode.CancellationTokenSource();
             let results = refProvider.provideReferences(doc, pos, ctx, tokenSource.token);
             let passed: boolean = true;
@@ -135,7 +135,7 @@ suite("YARA: Provider", function () {
                 if (passed) { done(); }
             }
             else if (results instanceof Promise) {
-                results.then(function(references) {
+                results.then(function (references) {
                     if (references.length != 4) {
                         passed = false;
                     }
@@ -153,7 +153,7 @@ suite("YARA: Provider", function () {
     });
 });
 
-suite("YARA: Diagnostics", function() {
+suite("YARA: Diagnostics", function () {
     test("compile success", function (done) {
         const filepath: string = path.join(workspace, "compile_success.yara");
         vscode.workspace.openTextDocument(filepath).then(function (doc) {
@@ -170,8 +170,8 @@ suite("YARA: Diagnostics", function() {
         vscode.workspace.openTextDocument(filepath).then(function (doc) {
             yara.CompileRule(doc).then(function (diagnostics: Array<vscode.Diagnostic>) {
                 let passed: boolean = false;
-                if (diagnostics.length == 2 ) {
-                    diagnostics.forEach(function(diagnostic) {
+                if (diagnostics.length == 2) {
+                    diagnostics.forEach(function (diagnostic) {
                         if (diagnostic.severity == vscode.DiagnosticSeverity.Error) {
                             if (diagnostic.range.start.line == 8 && diagnostic.range.end.line == 8) {
                                 passed = true;
@@ -202,18 +202,40 @@ suite("YARA: Diagnostics", function() {
     });
 });
 
-suite("YARA: Configuration", function() {
+suite("YARA: Configuration", function () {
     test.skip("installPath", function (done) {
+        // set the installPath to the yarac binary
+        // pass
+        // compile the failed file and make sure the same is returned as if yarac is in the $PATH
         const filepath: string = path.join(workspace, "compile_fail.yara");
         vscode.workspace.openTextDocument(filepath).then(function (doc) {
-            // pass
+            yara.CompileRule(doc).then(function (diagnostics: Array<vscode.Diagnostic>) {
+                let passed: boolean = false;
+                if (diagnostics.length == 2) {
+                    diagnostics.forEach(function (diagnostic) {
+                        if (diagnostic.severity == vscode.DiagnosticSeverity.Error) {
+                            if (diagnostic.range.start.line == 8 && diagnostic.range.end.line == 8) {
+                                passed = true;
+                                return;
+                            }
+                        }
+                        passed = false;
+                    });
+                }
+                if (passed) { done(); }
+            });
         });
     });
 
     test.skip("compileFlags", function (done) {
         const filepath: string = path.join(workspace, "compile_warn.yara");
+        // compile the warnings file and make sure nothing is returned
         vscode.workspace.openTextDocument(filepath).then(function (doc) {
-            // pass
+            // set the yarac flags to --no-warnings for the current workspace folder
+            vscode.workspace.getConfiguration("yara").update("yara.compileFlags", "--no-warnings", null);
+            yara.CompileRule(doc).then(function (diagnostics: Array<vscode.Diagnostic>) {
+                if (diagnostics.length == 0) { done(); }
+            });
         });
     });
 });
