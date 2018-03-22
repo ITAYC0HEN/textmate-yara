@@ -9,6 +9,7 @@ import * as vscode from "vscode";
 const varFirstChar: Set<string> = new Set(["$", "#", "@", "!"]);
 let diagnosticCollection: vscode.DiagnosticCollection;
 let config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("yara");
+let saveSubscription: vscode.Disposable;
 
 /*
     Compile the current file in the VSCode workspace as a YARA rule
@@ -62,6 +63,9 @@ export function CompileRule(doc: vscode.TextDocument | null) {
             errors = err.message.endsWith("ENOENT") ? "Cannot compile YARA rule. Please specify an install path" : `Error: ${err.message}`;
             vscode.window.showErrorMessage(errors);
             console.log(errors);
+            // set indefinitely
+            vscode.window.setStatusBarMessage("yarac not installed");
+            saveSubscription.dispose();
             reject(errors);
         });
         result.on("close", (code) => {
@@ -239,7 +243,8 @@ export function activate(context: vscode.ExtensionContext) {
     let YARA: vscode.DocumentSelector = { language: "yara", scheme: "file" };
     let definitionDisposable: vscode.Disposable = vscode.languages.registerDefinitionProvider(YARA, new YaraDefinitionProvider());
     let referenceDisposable: vscode.Disposable = vscode.languages.registerReferenceProvider(YARA, new YaraReferenceProvider());
-    let saveSubscription = vscode.workspace.onDidSaveTextDocument(() => { CompileRule(null); });
+    // let saveSubscription = vscode.workspace.onDidSaveTextDocument(() => { CompileRule(null); });
+    saveSubscription = vscode.workspace.onDidSaveTextDocument(() => { CompileRule(null); });
     let configSubscription = vscode.workspace.onDidChangeConfiguration(() => { config = vscode.workspace.getConfiguration("yara"); });
     diagnosticCollection = vscode.languages.createDiagnosticCollection('yara');
     context.subscriptions.push(definitionDisposable);
