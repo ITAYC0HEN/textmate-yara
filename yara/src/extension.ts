@@ -3,6 +3,7 @@
 import * as proc from "child_process";
 import * as tmp from "tempy";
 import * as vscode from "vscode";
+import {YaraCompletionItemProvider} from "./completionProvider";
 
 
 // variables have a few possible first characters - use these to identify vars vs. rules
@@ -25,8 +26,8 @@ export function CompileRule(doc: vscode.TextDocument | null) {
         doc = editor.document;
     }
     // use user's installation path if one exists, else assume "yarac" is available in the $PATH
-    let compilerPath: string = config.get("installPath") !== null ? `${config.get("installPath")}/yarac` : "yarac";
-    let compileFlags: string | null | Array<string> = config.get("compileFlags");
+    let compilerPath: string = config.get("install_path") !== null ? `${config.get("install_path")}/yarac` : "yarac";
+    let compileFlags: string | null | Array<string> = config.get("compile_flags");
     let ofile = tmp.file({ name: "yarac.tmp" });
     let flags: Array<string>;
     if (compileFlags && typeof compileFlags === "string") {
@@ -203,18 +204,36 @@ export class YaraReferenceProvider implements vscode.ReferenceProvider {
             let possibleVarRange: vscode.Range = new vscode.Range(possibleVarStart, range.end);
             let possibleVar: string = doc.getText(possibleVarRange);
             if (varFirstChar.has(possibleVar.charAt(0))) {
+                let varRegexp: string;
+                let startLine: number;
+                let endLine: number;
                 // console.log(`Identified symbol as a variable: ${symbol}`);
-                let lineNo = 0;
-                lines.forEach(line => {
-                    let character: number = line.search(`[\$#@!]${symbol}[^a-zA-Z0-9_]`);
+                let possibleWildcardEnd: vscode.Position = new vscode.Position(range.end.line, range.end.character + 1);
+                let possibleWildcardRange: vscode.Range = new vscode.Range(possibleVarStart, possibleWildcardEnd);
+                let possibleWildcard: string = doc.getText(possibleWildcardRange);
+                if (possibleWildcard.slice(-1) == "*") {
+                    // treat like a wildcard and search only the local rule
+                    varRegexp = `[\$#@!]${symbol}[a-zA-Z0-9_]+`;
+                    let ruleRange = GetRuleRange(lines, pos);
+                    startLine = ruleRange.start.line;
+                    endLine = ruleRange.end.line;
+                }
+                else {
+                    // treat like a normal variable reference and search the whole document
+                    varRegexp = `[\$#@!]${symbol}[^a-zA-Z0-9_]`;
+                    startLine = 0;
+                    endLine = lines.length;
+                }
+                for (let lineNo = startLine; lineNo < endLine; lineNo++) {
+                    let character: number = lines[lineNo].search(varRegexp);
                     if (character != -1) {
                         // console.log(`Found ${symbol} on line ${lineNo} at character ${character}`);
                         // have to readjust the character index
                         let refPosition: vscode.Position = new vscode.Position(lineNo, character + 1);
                         references.push(new vscode.Location(fileUri, refPosition));
                     }
-                    lineNo++;
-                });
+
+                }
             }
             else {
                 let lineNo = 0;
@@ -243,12 +262,13 @@ export function activate(context: vscode.ExtensionContext) {
     let YARA: vscode.DocumentSelector = { language: "yara", scheme: "file" };
     let definitionDisposable: vscode.Disposable = vscode.languages.registerDefinitionProvider(YARA, new YaraDefinitionProvider());
     let referenceDisposable: vscode.Disposable = vscode.languages.registerReferenceProvider(YARA, new YaraReferenceProvider());
-    // let saveSubscription = vscode.workspace.onDidSaveTextDocument(() => { CompileRule(null); });
-    saveSubscription = vscode.workspace.onDidSaveTextDocument(() => { CompileRule(null); });
-    let configSubscription = vscode.workspace.onDidChangeConfiguration(() => { config = vscode.workspace.getConfiguration("yara"); });
+    let completionDisposable: vscode.Disposable = vscode.languages.registerCompletionItemProvider(YARA, new YaraCompletionItemProvider(), '.');
+    saveSubscription = vscode.workspace.onDidSaveTextDocument(function() { CompileRule(null); });
+    let configSubscription = vscode.workspace.onDidChangeConfiguration(function() { config = vscode.workspace.getConfiguration("yara"); });
     diagnosticCollection = vscode.languages.createDiagnosticCollection('yara');
     context.subscriptions.push(definitionDisposable);
     context.subscriptions.push(referenceDisposable);
+    context.subscriptions.push(completionDisposable);
     context.subscriptions.push(saveSubscription);
     context.subscriptions.push(configSubscription);
     context.subscriptions.push(diagnosticCollection);

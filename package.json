@@ -1,8 +1,8 @@
 {
     "name": "yara",
     "displayName": "YARA",
-    "description": "Syntax highlighting and snippets support for the YARA pattern matching language",
-    "version": "1.2.2",
+    "description": "Rich language support for the YARA pattern matching language",
+    "version": "1.3.0",
     "icon": "images/logo.png",
     "galleryBanner": {
         "color": "#A4A4A4",
@@ -18,41 +18,38 @@
         "url": "https://github.com/infosec-intern/textmate-yara/issues"
     },
     "engines": {
-        "vscode": "^1.0.0"
+        "vscode": "^1.22.0"
     },
     "categories": [
         "Languages",
         "Snippets"
     ],
     "contributes": {
-        "configuration": [
-            {
-                "title": "YARA configuration",
-                "properties": {
-                    "yara.compileFlags": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "default": null,
-                        "description": "Flags to pass to the 'yarac' compiler"
-                    },
-                    "yara.compileOnSave": {
-                        "type": "boolean",
-                        "default": true,
-                        "description": "Compile the active rule on each save and draw diagnostics on screen"
-                    },
-                    "yara.installPath": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "default": null,
-                        "description": "Path to the 'yarac' executable"
-                    }
+        "configuration": {
+            "title": "YARA configuration",
+            "properties": {
+                "yara.require_imports": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "When providing suggestions for YARA modules, first require an import statement at the top of the rule file. For example, in order to autocomplete the 'time.now()' method, require 'import \"time\"'. Off by default."
+                },
+                "yara.install_path": {
+                    "type": ["string", "null"],
+                    "default": null,
+                    "description": "Filepath leading to the yarac binary. Absolute paths are preferred, and no trailing slashes."
+                },
+                "yara.compile_flags": {
+                    "type": ["string", "null", "array"],
+                    "default": null,
+                    "description": "Extra flags to pass to the yarac binary when compiling a rule"
+                },
+                "yara.compile_on_save": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Compile the active rule on each save and draw diagnostics on-screen"
                 }
             }
-        ],
+        },
         "grammars": [
             {
                 "language": "yara",
@@ -96,12 +93,12 @@
     },
     "devDependencies": {
         "@types/mocha": "^2.2.32",
-        "@types/node": "^6.0.102",
+        "@types/node": "^6.0.104",
         "child_process": "^1.0.2",
         "mocha": "^2.3.3",
         "path": "^0.12.7",
         "tempy": "^0.2.1",
-        "typescript": "^2.7.2",
+        "typescript": "^2.8.1",
         "vscode": "^1.1.14"
     }
 }

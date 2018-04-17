@@ -1,13 +1,7 @@
 ![Source - https://raw.githubusercontent.com/blacktop/docker-yara/master/logo.png](./images/logo.png)
 
 # textmate-yara
-Syntax Highlighting and Snippets support for the YARA pattern matching language
-
-Currently, Snippets support includes:
-* A new file skeleton (or `rule:` skeleton)
-* `import` statement completion
-* `strings:` section skeleton
-* `meta:` section skeleton
+Language support for the YARA pattern matching language
 
 ## Features
 
@@ -30,8 +24,7 @@ The `yarac` tool is assumed to be in the local $PATH by default, but a custom pa
 ```
 
 ### Definition Provider and Peeking
-Allows peeking and Ctrl+clicking to jump to a rule definition.
-This only applies to rule names at the moment, but variables are in the works
+Allows peeking and Ctrl+clicking to jump to a rule definition. This applies to both rule names and variables
 
 <img src="./images/peek_rules.PNG" width="60%" alt="Go To Definition">
 
@@ -40,23 +33,22 @@ Shows the locations of a given symbol (rule name, variable, constant, etc.)
 
 <img src="./images/references.PNG" width="60%" alt="Find All References">
 
+### Code Completion
+Provides completion suggestions for standard YARA modules, including `pe`, `elf`, `math`, and all the others available in the official documentation: http://yara.readthedocs.io/en/v3.7.0/modules.html
+
+![Code Completion](./images/module_completion.PNG)
+
+### Snippets
+Includes:
+* `rule:` skeleton
+* `import` statement completion
+* `strings:` section skeleton
+* `meta:` section skeleton
+
 ## Problems?
 If you encounter an issue with the syntax, feel free to create an issue or pull request!
-Alternatively, check out some of the YARA syntaxes for Sublime and Textmate (i.e. those in the <b>Example Code</b> section below).
-They use the same syntax engine as VSCode and should work the same way
+Alternatively, check out some of the YARA syntaxes for Sublime and Atom, or the one bundled with YARA itself.
+They use the same syntax engine as VSCode and should work the same way.
 
-## References
-#### Syntax Reference:<br>
+## YARA Documentation
 https://yara.readthedocs.io/
-
-#### TextMate Docs:<br>
-http://manual.macromates.com/en/language_grammars
-
-#### Regular Expressions:<br>
-http://www.regular-expressions.info/modifiers.html
-
-#### Example Code:<br>
-https://github.com/mmcgrana/textmate-clojure/blob/master/Syntaxes/Clojure.tmLanguage <br>
-https://github.com/textmate/python.tmbundle/blob/master/Syntaxes/Python.tmLanguage <br>
-https://github.com/nyx0/YaraSyntax/blob/master/yara.tmLanguage <br>
-https://github.com/blacktop/language-yara
