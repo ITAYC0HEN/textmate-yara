@@ -7,8 +7,6 @@ import {CompileRule} from "./diagnostics";
 
 // variables have a few possible first characters - use these to identify vars vs. rules
 const varFirstChar: Set<string> = new Set(["$", "#", "@", "!"]);
-let diagnosticCollection: vscode.DiagnosticCollection;
-let saveSubscription: vscode.Disposable;
 
 /*
     Get the start and end boundaries for the current YARA rule based on a symbol's position
@@ -156,8 +154,8 @@ export function activate(context: vscode.ExtensionContext) {
     let definitionDisposable: vscode.Disposable = vscode.languages.registerDefinitionProvider(YARA, new YaraDefinitionProvider());
     let referenceDisposable: vscode.Disposable = vscode.languages.registerReferenceProvider(YARA, new YaraReferenceProvider());
     let completionDisposable: vscode.Disposable = vscode.languages.registerCompletionItemProvider(YARA, new YaraCompletionItemProvider(), '.');
-    diagnosticCollection = vscode.languages.createDiagnosticCollection('yara');
-    saveSubscription = vscode.workspace.onDidSaveTextDocument(function() { CompileRule(null, diagnosticCollection); });
+    let diagnosticCollection: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection('yara');
+    let saveSubscription: vscode.Disposable = vscode.workspace.onDidSaveTextDocument(function() { CompileRule(null, diagnosticCollection); });
     context.subscriptions.push(definitionDisposable);
     context.subscriptions.push(referenceDisposable);
     context.subscriptions.push(completionDisposable);
