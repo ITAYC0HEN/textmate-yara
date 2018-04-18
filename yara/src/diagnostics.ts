@@ -4,8 +4,6 @@ import * as proc from "child_process";
 import * as tmp from "tempy";
 import * as vscode from "vscode";
 
-let config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("yara");
-
 /*
     Compile the current file in the VSCode workspace as a YARA rule
 */
@@ -19,6 +17,7 @@ export function CompileRule(doc: vscode.TextDocument | null, diagnosticCollectio
         }
         doc = editor.document;
     }
+    const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("yara");
     // use user's installation path if one exists, else assume "yarac" is available in the $PATH
     let compilerPath: string = config.get("install_path") !== null ? `${config.get("install_path")}/yarac` : "yarac";
     let compileFlags: string | null | Array<string> = config.get("compile_flags");
