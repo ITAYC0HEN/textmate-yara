@@ -9,6 +9,7 @@ import * as path from "path";
 import * as vscode from "vscode";
 import * as yara from "../yara/src/extension";
 import { YaraCompletionItemProvider } from "../yara/src/completionProvider";
+import { CompileRule } from "../yara/src/diagnostics";
 
 let workspace = path.join(__dirname, "..", "..", "test/rules/");
 
@@ -230,10 +231,11 @@ suite("YARA: Provider", function () {
 });
 
 suite("YARA: Diagnostics", function () {
+    let diagnosticCollection: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection('yara');
     test("compile success", function (done) {
         const filepath: string = path.join(workspace, "compile_success.yara");
         vscode.workspace.openTextDocument(filepath).then(function (doc) {
-            yara.CompileRule(doc).then(function (diagnostics: Array<vscode.Diagnostic>) {
+            CompileRule(doc, diagnosticCollection).then(function (diagnostics: Array<vscode.Diagnostic>) {
                 if (diagnostics.length == 0) {
                     done();
                 }
@@ -244,7 +246,7 @@ suite("YARA: Diagnostics", function () {
     test("compile fail", function (done) {
         const filepath: string = path.join(workspace, "compile_fail.yara");
         vscode.workspace.openTextDocument(filepath).then(function (doc) {
-            yara.CompileRule(doc).then(function (diagnostics: Array<vscode.Diagnostic>) {
+            CompileRule(doc, diagnosticCollection).then(function (diagnostics: Array<vscode.Diagnostic>) {
                 let passed: boolean = false;
                 if (diagnostics.length == 2) {
                     diagnostics.forEach(function (diagnostic) {
@@ -265,7 +267,7 @@ suite("YARA: Diagnostics", function () {
     test("compile warning", function (done) {
         const filepath: string = path.join(workspace, "compile_warn.yara");
         vscode.workspace.openTextDocument(filepath).then(function (doc) {
-            yara.CompileRule(doc).then(function (diagnostics: Array<vscode.Diagnostic>) {
+            CompileRule(doc, diagnosticCollection).then(function (diagnostics: Array<vscode.Diagnostic>) {
                 if (diagnostics.length == 1) {
                     if (diagnostics[0].severity == vscode.DiagnosticSeverity.Warning) {
                         if (diagnostics[0].range.start.line == 9 && diagnostics[0].range.end.line == 9) {
@@ -279,6 +281,8 @@ suite("YARA: Diagnostics", function () {
 });
 
 suite("YARA: Configuration", function () {
+    let diagnosticCollection: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection('yara');
+
     test("install_path success", function (done) {
         // set the install_path to the yarac binary
         // compile the failed file and make sure the same is returned as if yarac is in the $PATH
@@ -287,7 +291,7 @@ suite("YARA: Configuration", function () {
         config.update("install_path", "$env:APPDATA\\Yara");
         const filepath: string = path.join(workspace, "compile_fail.yara");
         vscode.workspace.openTextDocument(filepath).then(function (doc) {
-            yara.CompileRule(doc).then(function (diagnostics: Array<vscode.Diagnostic>) {
+            CompileRule(doc, diagnosticCollection).then(function (diagnostics: Array<vscode.Diagnostic>) {
                 let passed: boolean = false;
                 if (diagnostics.length == 2) {
                     diagnostics.forEach(function (diagnostic) {
@@ -314,9 +318,9 @@ suite("YARA: Configuration", function () {
         config.update("install_path", "$env:APPDATA\\DoesntExist");
         const filepath: string = path.join(workspace, "compile_fail.yara");
         vscode.workspace.openTextDocument(filepath).then(function (doc) {
-            yara.CompileRule(doc).then(function (diagnostics: Array<vscode.Diagnostic>) {
+            CompileRule(doc, diagnosticCollection).then(function (diagnostics: Array<vscode.Diagnostic>) {
                 // if CompileRule completes then something went wrong
-                
+
             }).catch(function (error: Error) {
                 console.log(error.message);
                 // we got the appropriate error. Yay!
@@ -334,7 +338,7 @@ suite("YARA: Configuration", function () {
         vscode.workspace.openTextDocument(filepath).then(function (doc) {
             // set the yarac flags to --no-warnings for the current workspace folder
             vscode.workspace.getConfiguration("yara").update("yara.compile_flags", "--no-warnings", null);
-            yara.CompileRule(doc).then(function (diagnostics: Array<vscode.Diagnostic>) {
+            CompileRule(doc, diagnosticCollection).then(function (diagnostics: Array<vscode.Diagnostic>) {
                 if (diagnostics.length == 0) { done(); }
             });
         });
