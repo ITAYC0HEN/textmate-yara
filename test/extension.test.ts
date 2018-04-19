@@ -321,8 +321,18 @@ suite.skip("YARA: Configuration", function () {
         });
     });
 
-    test("compile_flags", function (done) {
+    test("compile_flags success", function (done) {
         // compile the warnings file and make sure nothing is returned
+        const filepath: string = path.join(workspace, "compile_warn.yara");
+        vscode.workspace.openTextDocument(filepath).then(function (doc) {
+            CompileRule(doc, diagnosticCollection).then(function (diagnostics: Array<vscode.Diagnostic>) {
+                if (diagnostics.length == 0) { done(); }
+            });
+        });
+    });
+
+    test("compile_flags failure", function (done) {
+        // compile the warnings file with a flag that doesn't exist and make sure VSCode doesn't shit the bed
         const filepath: string = path.join(workspace, "compile_warn.yara");
         vscode.workspace.openTextDocument(filepath).then(function (doc) {
             CompileRule(doc, diagnosticCollection).then(function (diagnostics: Array<vscode.Diagnostic>) {
