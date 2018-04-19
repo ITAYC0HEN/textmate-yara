@@ -26,6 +26,9 @@ export function CompileRule(doc: vscode.TextDocument | null, diagnosticCollectio
     if (compileFlags && typeof compileFlags === "string") {
         flags = [compileFlags, doc.fileName, ofile];
     }
+    else if (compileFlags && compileFlags instanceof Array) {
+        flags = [compileFlags.join(" "), doc.fileName, ofile];
+    }
     else {
         flags = [doc.fileName, ofile];
     }
