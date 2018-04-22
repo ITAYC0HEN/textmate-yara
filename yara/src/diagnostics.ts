@@ -50,8 +50,8 @@ export function CompileRule(doc: vscode.TextDocument | null, diagnosticCollectio
                     }
                 }
                 else if (line.startsWith("unknown option")) {
-                    vscode.window.showErrorMessage(line);
-                    console.log(`[Error] ${line}`);
+                    vscode.window.showErrorMessage(`YARA Compile Flags: ${line}`);
+                    console.log(`[YARA Compile Flags] ${line}`);
                     errors = line;
                 }
             });
