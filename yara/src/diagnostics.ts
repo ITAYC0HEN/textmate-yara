@@ -13,9 +13,12 @@ export function CompileRule(doc: vscode.TextDocument | null, diagnosticCollectio
         if (!editor) {
             vscode.window.showErrorMessage("Couldn't get the active text editor");
             console.log("Couldn't get the text editor");
-            return new Promise((resolve, reject) => { null; });
+            return new Promise((resolve, reject) => { reject(null); });
         }
         doc = editor.document;
+    }
+    if (doc.languageId != "yara") {
+        return new Promise((resolve, reject) => { reject(null); });
     }
     const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("yara");
     // use user's installation path if one exists, else assume "yarac" is available in the $PATH

@@ -150,7 +150,7 @@ export class YaraReferenceProvider implements vscode.ReferenceProvider {
 
 export function activate(context: vscode.ExtensionContext) {
     // console.log("Activating Yara extension");
-    let YARA: vscode.DocumentSelector = { language: "yara", scheme: "file" };
+    const YARA: vscode.DocumentSelector = { language: "yara", scheme: "file" };
     let definitionDisposable: vscode.Disposable = vscode.languages.registerDefinitionProvider(YARA, new YaraDefinitionProvider());
     let referenceDisposable: vscode.Disposable = vscode.languages.registerReferenceProvider(YARA, new YaraReferenceProvider());
     let completionDisposable: vscode.Disposable = vscode.languages.registerCompletionItemProvider(YARA, new YaraCompletionItemProvider(), '.');
