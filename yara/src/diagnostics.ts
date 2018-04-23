@@ -19,9 +19,9 @@ export function CompileRule(doc: vscode.TextDocument | null, diagnosticCollectio
     }
     const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("yara");
     // use user's installation path if one exists, else assume "yarac" is available in the $PATH
-    let compilerPath: string = config.get("install_path") !== null ? `${config.get("install_path")}/yarac` : "yarac";
-    let compileFlags: string | null | Array<string> = config.get("compile_flags");
-    let ofile = tmp.file({ name: "yarac.tmp" });
+    const compilerPath: string = config.get("install_path") !== null ? `${config.get("install_path")}/yarac` : "yarac";
+    const compileFlags: string | null | Array<string> = config.get("compile_flags");
+    const ofile = tmp.file({ extension: "yarac" });
     let flags: Array<string>;
     if (compileFlags && typeof compileFlags === "string") {
         flags = [compileFlags, doc.fileName, ofile];
