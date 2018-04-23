@@ -34,12 +34,19 @@
                     "description": "When providing suggestions for YARA modules, first require an import statement at the top of the rule file. For example, in order to autocomplete the 'time.now()' method, require 'import \"time\"'. Off by default."
                 },
                 "yara.install_path": {
-                    "type": ["string", "null"],
+                    "type": [
+                        "string",
+                        "null"
+                    ],
                     "default": null,
                     "description": "Filepath leading to the yarac binary. Absolute paths are preferred, and no trailing slashes."
                 },
                 "yara.compile_flags": {
-                    "type": ["string", "null", "array"],
+                    "type": [
+                        "string",
+                        "null",
+                        "array"
+                    ],
                     "default": null,
                     "description": "Extra flags to pass to the yarac binary when compiling a rule"
                 },
@@ -93,12 +100,15 @@
     },
     "devDependencies": {
         "@types/mocha": "^2.2.32",
-        "@types/node": "^6.0.104",
+        "@types/node": "^6.0.106",
         "child_process": "^1.0.2",
         "mocha": "^2.3.3",
         "path": "^0.12.7",
         "tempy": "^0.2.1",
-        "typescript": "^2.8.1",
+        "typescript": "^2.8.3",
         "vscode": "^1.1.14"
+    },
+    "dependencies": {
+        "@types/tempy": "^0.1.0"
     }
 }
