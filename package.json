@@ -25,6 +25,11 @@
         "Snippets"
     ],
     "contributes": {
+        "commands": {
+            "command": "yara.CompileRule",
+            "title": "Compile rule",
+            "category": "YARA"
+        },
         "configuration": {
             "title": "YARA configuration",
             "properties": {
