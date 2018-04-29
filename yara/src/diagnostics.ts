@@ -68,12 +68,12 @@ export function CompileRule(doc: vscode.TextDocument | null, diagnosticCollectio
             reject(errors);
         });
         result.on("close", (code) => {
-            diagnosticCollection.set(vscode.Uri.file(doc.fileName), diagnostics);
             if (diagnostic_errors == 0 && errors == null) {
                 // status bar message goes away after 3 seconds
                 vscode.window.setStatusBarMessage("File compiled successfully!", 3000);
-                // console.log("File compiled successfully!");
+                console.log("File compiled successfully!");
             }
+            diagnosticCollection.set(vscode.Uri.file(doc.fileName), diagnostics);
             resolve(diagnostics);
         });
     });
