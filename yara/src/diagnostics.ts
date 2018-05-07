@@ -60,7 +60,7 @@ export function CompileRule(doc: vscode.TextDocument | null, diagnosticCollectio
             });
         });
         result.on("error", (err) => {
-            errors = err.message.endsWith("ENOENT") ? "Cannot compile YARA rule. Please specify an install path" : `YARA Error: ${err.message}`;
+            errors = err.message.endsWith("ENOENT") ? "Cannot compile YARA rule. Please specify an install path and reload the window" : `YARA Error: ${err.message}`;
             vscode.window.showErrorMessage(errors);
             console.log(errors);
             // set indefinitely
