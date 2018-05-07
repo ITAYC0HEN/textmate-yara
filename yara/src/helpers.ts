@@ -8,6 +8,8 @@ export const varFirstChar: Set<string> = new Set(["$", "#", "@", "!"]);
 
 /*
     Get the start and end boundaries for the current YARA rule based on a symbol's position
+    :lines: String array that represents each line in the current YARA rule
+    :symbol: Current symbol that we want the rule range of
 */
 export function GetRuleRange(lines: string[], symbol: vscode.Position) {
     let begin: vscode.Position | null = null;
