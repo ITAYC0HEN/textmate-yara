@@ -6,6 +6,8 @@ import * as vscode from "vscode";
 
 /*
     Compile the current file in the VSCode workspace as a YARA rule
+    :doc: The current workspace document to draw diagnostics data on
+    :diagnosticCollection: Set of diagnostics data for VSCode to draw on the screen
 */
 export function CompileRule(doc: vscode.TextDocument | null, diagnosticCollection: vscode.DiagnosticCollection) {
     if (!doc) {

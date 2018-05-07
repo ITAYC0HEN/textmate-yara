@@ -6,7 +6,6 @@ import { YaraDefinitionProvider } from "./definitionProvider";
 import { YaraReferenceProvider } from "./referenceProvider";
 import { CompileRule } from "./diagnostics";
 
-// ugly, ugly way to dispose of a subscription
 let saveSubscription: vscode.Disposable | null = null;
 
 export function activate(context: vscode.ExtensionContext) {
@@ -18,6 +17,7 @@ export function activate(context: vscode.ExtensionContext) {
     let diagnosticCollection: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection('yara');
     let compileCommand: vscode.Disposable = vscode.commands.registerCommand("yara.CompileRule", function () { CompileRule(null, diagnosticCollection); });
     saveSubscription = vscode.workspace.onDidSaveTextDocument(function () {
+        // ugly, ugly way to dispose of a subscription
         CompileRule(null, diagnosticCollection).catch(function (err) {
             if (err == "Cannot compile YARA rule. Please specify an install path") {
                 console.log("Disposing of saveSubscription");
