@@ -2,10 +2,12 @@
 
 import * as vscode from "vscode";
 import { YaraCompletionItemProvider } from "./completionProvider";
-import {YaraDefinitionProvider} from "./definitionProvider";
-import {YaraReferenceProvider} from "./referenceProvider";
+import { YaraDefinitionProvider } from "./definitionProvider";
+import { YaraReferenceProvider } from "./referenceProvider";
 import { CompileRule } from "./diagnostics";
 
+// ugly, ugly way to dispose of a subscription
+let saveSubscription: vscode.Disposable | null = null;
 
 export function activate(context: vscode.ExtensionContext) {
     // console.log("Activating Yara extension");
@@ -15,7 +17,14 @@ export function activate(context: vscode.ExtensionContext) {
     let completionDisposable: vscode.Disposable = vscode.languages.registerCompletionItemProvider(YARA, new YaraCompletionItemProvider(), '.');
     let diagnosticCollection: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection('yara');
     let compileCommand: vscode.Disposable = vscode.commands.registerCommand("yara.CompileRule", function () { CompileRule(null, diagnosticCollection); });
-    let saveSubscription: vscode.Disposable = vscode.workspace.onDidSaveTextDocument(function () { CompileRule(null, diagnosticCollection); });
+    saveSubscription = vscode.workspace.onDidSaveTextDocument(function () {
+        CompileRule(null, diagnosticCollection).catch(function (err) {
+            if (err == "Cannot compile YARA rule. Please specify an install path") {
+                console.log("Disposing of saveSubscription");
+                saveSubscription.dispose();
+            }
+        });
+    });
     context.subscriptions.push(definitionDisposable);
     context.subscriptions.push(referenceDisposable);
     context.subscriptions.push(completionDisposable);
