@@ -286,11 +286,10 @@ suite("YARA: Commands", function () {
     test("CompileRule", function (done) {
         const filepath: string = path.join(workspace, "compile_success.yara");
         vscode.workspace.openTextDocument(filepath).then(function (doc: vscode.TextDocument) {
-            vscode.commands.executeCommand("yara.CompileRule", doc).then(
-                function (diagnostics: Array<vscode.Diagnostic>) {
-                    if (diagnostics.length == 0) {
-                        done();
-                    }
+            vscode.commands.executeCommand("yara.CompileRule", doc).then(function (diagnostics: Array<vscode.Diagnostic>) {
+                if (diagnostics.length == 0) {
+                    done();
+                }
             });
         });
     });
