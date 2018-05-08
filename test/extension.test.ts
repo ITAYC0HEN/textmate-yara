@@ -282,7 +282,7 @@ suite("YARA: Diagnostics", function () {
     });
 });
 
-suite.skip("YARA: Commands", function () {
+suite("YARA: Commands", function () {
     test("CompileRule", function (done) {
         const filepath: string = path.join(workspace, "compile_success.yara");
         vscode.workspace.openTextDocument(filepath).then(function (doc: vscode.TextDocument) {

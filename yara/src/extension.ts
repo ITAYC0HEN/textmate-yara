@@ -15,7 +15,9 @@ export function activate(context: vscode.ExtensionContext) {
     let referenceDisposable: vscode.Disposable = vscode.languages.registerReferenceProvider(YARA, new YaraReferenceProvider());
     let completionDisposable: vscode.Disposable = vscode.languages.registerCompletionItemProvider(YARA, new YaraCompletionItemProvider(), '.');
     let diagnosticCollection: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection('yara');
-    let compileCommand: vscode.Disposable = vscode.commands.registerCommand("yara.CompileRule", function () { CompileRule(null, diagnosticCollection); });
+    let compileCommand: vscode.Disposable = vscode.commands.registerCommand("yara.CompileRule", function () {
+        CompileRule(null, diagnosticCollection);
+    });
     saveSubscription = vscode.workspace.onDidSaveTextDocument(function () {
         // ugly, ugly way to dispose of a subscription
         CompileRule(null, diagnosticCollection).catch(function (err) {
