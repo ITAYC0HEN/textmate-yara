@@ -58,6 +58,7 @@
                 "yara.compile_on_save": {
                     "type": "boolean",
                     "default": true,
+                    "scope": "resource",
                     "description": "Compile the active rule on each save and draw diagnostics on-screen"
                 }
             }
