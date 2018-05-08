@@ -6,8 +6,6 @@ import { YaraDefinitionProvider } from "./definitionProvider";
 import { YaraReferenceProvider } from "./referenceProvider";
 import { CompileRule } from "./diagnostics";
 
-let saveSubscription: vscode.Disposable | null = null;
-
 export function activate(context: vscode.ExtensionContext) {
     // console.log("Activating Yara extension");
     const YARA: vscode.DocumentSelector = { language: "yara", scheme: "file" };
@@ -19,7 +17,7 @@ export function activate(context: vscode.ExtensionContext) {
         function (doc?: vscode.TextDocument | null) {
             return CompileRule(doc, diagnosticCollection);
         });
-    saveSubscription = vscode.workspace.onDidSaveTextDocument(function () {
+    let saveSubscription: vscode.Disposable = vscode.workspace.onDidSaveTextDocument(function () {
         let fileUri: vscode.Uri = vscode.window.activeTextEditor.document.uri;
         let localConfig: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("yara", fileUri);
         if (localConfig.get("compile_on_save")) {
