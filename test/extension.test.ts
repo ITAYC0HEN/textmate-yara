@@ -286,10 +286,8 @@ suite("YARA: Commands", function () {
     test("CompileRule", function (done) {
         const filepath: string = path.join(workspace, "compile_success.yara");
         vscode.workspace.openTextDocument(filepath).then(function (doc: vscode.TextDocument) {
-            console.log(`doc: ${JSON.stringify(doc)}`);
-            vscode.commands.executeCommand("yara.CompileRule", doc, diagnosticCollection).then(
+            vscode.commands.executeCommand("yara.CompileRule", doc).then(
                 function (diagnostics: Array<vscode.Diagnostic>) {
-                    console.log(diagnostics);
                     if (diagnostics.length == 0) {
                         done();
                     }
