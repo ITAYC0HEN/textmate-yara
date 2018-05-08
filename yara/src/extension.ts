@@ -15,17 +15,20 @@ export function activate(context: vscode.ExtensionContext) {
     let referenceDisposable: vscode.Disposable = vscode.languages.registerReferenceProvider(YARA, new YaraReferenceProvider());
     let completionDisposable: vscode.Disposable = vscode.languages.registerCompletionItemProvider(YARA, new YaraCompletionItemProvider(), '.');
     let diagnosticCollection: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection('yara');
-    let compileCommand: vscode.Disposable = vscode.commands.registerCommand("yara.CompileRule", function () {
-        CompileRule(null, diagnosticCollection);
-    });
-    saveSubscription = vscode.workspace.onDidSaveTextDocument(function () {
-        // ugly, ugly way to dispose of a subscription
-        CompileRule(null, diagnosticCollection).catch(function (err) {
-            if (err == "Cannot compile YARA rule. Please specify an install path") {
-                console.log("Disposing of saveSubscription");
-                saveSubscription.dispose();
-            }
+    let compileCommand: vscode.Disposable = vscode.commands.registerCommand("yara.CompileRule",
+        function (doc?: vscode.TextDocument | null) {
+            return CompileRule(doc, diagnosticCollection);
         });
+    saveSubscription = vscode.workspace.onDidSaveTextDocument(function () {
+        let fileUri: vscode.Uri = vscode.window.activeTextEditor.document.uri;
+        let localConfig: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("yara", fileUri);
+        if (localConfig.get("compile_on_save")) {
+            CompileRule(null, diagnosticCollection).catch(function (err: string) {
+                if (err.startsWith("Cannot compile YARA rule")) {
+                    localConfig.update("compile_on_save", false);
+                }
+            });
+        }
     });
     context.subscriptions.push(definitionDisposable);
     context.subscriptions.push(referenceDisposable);
