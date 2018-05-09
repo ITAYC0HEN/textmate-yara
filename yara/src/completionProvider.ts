@@ -64,7 +64,7 @@ export class YaraCompletionItemProvider implements vscode.CompletionItemProvider
     public provideCompletionItems(doc: vscode.TextDocument, pos: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext): vscode.ProviderResult<vscode.CompletionItem[] | vscode.CompletionList> {
         return new Promise((resolve, reject) => {
             if (context == undefined || context.triggerCharacter == ".") {
-                let config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("yara");
+                let config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("yara", doc.uri);
                 let items: vscode.CompletionItem[] = Array<vscode.CompletionItem>();
                 let fields: any = modules.get(doc, pos, config.get("require_imports", false));
                 if (fields != null) {

@@ -36,6 +36,7 @@
                 "yara.require_imports": {
                     "type": "boolean",
                     "default": false,
+                    "scope": "resource",
                     "description": "When providing suggestions for YARA modules, first require an import statement at the top of the rule file. For example, in order to autocomplete the 'time.now()' method, require 'import \"time\"'. Off by default."
                 },
                 "yara.install_path": {
@@ -44,6 +45,7 @@
                         "null"
                     ],
                     "default": null,
+                    "scope": "resource",
                     "description": "Filepath leading to the yarac binary. Absolute paths are preferred, and no trailing slashes."
                 },
                 "yara.compile_flags": {
@@ -53,6 +55,7 @@
                         "array"
                     ],
                     "default": null,
+                    "scope": "resource",
                     "description": "Extra flags to pass to the yarac binary when compiling a rule"
                 },
                 "yara.compile_on_save": {

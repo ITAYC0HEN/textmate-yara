@@ -22,7 +22,7 @@ export function CompileRule(doc: vscode.TextDocument | null, diagnosticCollectio
     if (doc.languageId != "yara") {
         return new Promise((resolve, reject) => { reject(null); });
     }
-    const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("yara");
+    const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("yara", doc.uri);
     // use user's installation path if one exists, else assume "yarac" is available in the $PATH
     const compilerPath: string = config.get("install_path") !== null ? `${config.get("install_path")}/yarac` : "yarac";
     const compileFlags: string | null | Array<string> = config.get("compile_flags");
