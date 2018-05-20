@@ -14,7 +14,7 @@ export function CompileRule(doc: vscode.TextDocument | null, diagnosticCollectio
         const editor: vscode.TextEditor = vscode.window.activeTextEditor;
         if (!editor) {
             vscode.window.showErrorMessage("Couldn't get the active text editor");
-            console.log("Couldn't get the text editor");
+            // console.log("Couldn't get the text editor");
             return new Promise((resolve, reject) => { reject(null); });
         }
         doc = editor.document;
@@ -56,7 +56,7 @@ export function CompileRule(doc: vscode.TextDocument | null, diagnosticCollectio
                 }
                 else if (line.startsWith("unknown option")) {
                     vscode.window.showErrorMessage(`YARA Compile Flags: ${line}`);
-                    console.log(`[YARA Compile Flags] ${line}`);
+                    // console.log(`[YARA Compile Flags] ${line}`);
                     errors = line;
                 }
             });
@@ -64,7 +64,7 @@ export function CompileRule(doc: vscode.TextDocument | null, diagnosticCollectio
         result.on("error", (err) => {
             errors = err.message.endsWith("ENOENT") ? "Cannot compile YARA rule. Please specify an install path and reload the window" : `YARA Error: ${err.message}`;
             vscode.window.showErrorMessage(errors);
-            console.log(errors);
+            // console.log(errors);
             // set indefinitely
             vscode.window.setStatusBarMessage("yarac not installed");
             reject(errors);
@@ -73,7 +73,7 @@ export function CompileRule(doc: vscode.TextDocument | null, diagnosticCollectio
             if (diagnostic_errors == 0 && errors == null) {
                 // status bar message goes away after 3 seconds
                 vscode.window.setStatusBarMessage("File compiled successfully!", 3000);
-                console.log("File compiled successfully!");
+                // console.log("File compiled successfully!");
             }
             diagnosticCollection.set(vscode.Uri.file(doc.fileName), diagnostics);
             resolve(diagnostics);
@@ -112,7 +112,7 @@ function ParseOutput(line: string, doc: vscode.TextDocument) {
     }
     catch (error) {
         vscode.window.showErrorMessage(error);
-        console.log(error);
+        // console.log(error);
         return null;
     }
 }
