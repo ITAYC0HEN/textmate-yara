@@ -334,10 +334,9 @@ suite("YARA: Configuration", function () {
             // set the install_path to the yarac binary
             CompileRule(doc, diagnosticCollection).then(function (diagnostics: Array<vscode.Diagnostic>) {
                 // if CompileRule completes then something went wrong
-            }).catch(function (error: Error) {
-                console.log(error.message);
+            }).catch(function (error: string) {
                 // we got the appropriate error. Yay!
-                if (error.message == "Cannot compile YARA rule. Please specify an install path") {
+                if (error == "Cannot compile YARA rule. Please specify an install path and reload the window") {
                     done();
                 }
             });
@@ -372,6 +371,9 @@ suite("YARA: Configuration", function () {
             // config.update("compile_flags", "--catfacts", false);
             CompileRule(doc, diagnosticCollection).then(function (diagnostics: Array<vscode.Diagnostic>) {
                 if (diagnostics.length == 0) { done(); }
+            }).catch(function(error: string) {
+                // we got the appropriate error. Yay!
+                if (error.startsWith("unknown option ")) { done(); }
             });
             // reset the compile_flags
             // config.update("compile_flags", old_compile_flags, false);
