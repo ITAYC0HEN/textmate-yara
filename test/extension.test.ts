@@ -330,8 +330,8 @@ suite("YARA: Configuration", function () {
         vscode.workspace.openTextDocument(filepath).then(function (doc) {
             // let config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("yara", doc.uri);
             // const old_install_path: string | null = config.get("install_path");
-            // config.update("install_path", `${process.env.APPDATA}\\DoesntExist`, null);
             // set the install_path to the yarac binary
+            // config.update("install_path", `${process.env.APPDATA}\\DoesntExist`, null);
             CompileRule(doc, diagnosticCollection).then(function (diagnostics: Array<vscode.Diagnostic>) {
                 // if CompileRule completes then something went wrong
             }).catch(function (error: string) {
@@ -352,7 +352,7 @@ suite("YARA: Configuration", function () {
             // let config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("yara", doc.uri);
             // const old_compile_flags: string | null | Array<string> = config.get("compile_flags");
             // set the compile_flags to exclude warnings
-            // config.update("compile_flags", "--no-warnings", null)
+            // config.update("compile_flags", "--no-warnings", null);
             CompileRule(doc, diagnosticCollection).then(function (diagnostics: Array<vscode.Diagnostic>) {
                 if (diagnostics.length == 0) { done(); }
             });
