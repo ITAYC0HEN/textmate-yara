@@ -57,14 +57,13 @@ export function CompileRule(doc: vscode.TextDocument | null, diagnosticCollectio
                 else if (line.startsWith("unknown option")) {
                     vscode.window.showErrorMessage(`YARA Compile Flags: ${line}`);
                     // console.log(`[YARA Compile Flags] ${line}`);
-                    errors = line;
+                    reject(line);
                 }
             });
         });
         result.on("error", (err) => {
             errors = err.message.endsWith("ENOENT") ? "Cannot compile YARA rule. Please specify an install path and reload the window" : `YARA Error: ${err.message}`;
             vscode.window.showErrorMessage(errors);
-            // console.log(errors);
             // set indefinitely
             vscode.window.setStatusBarMessage("yarac not installed");
             reject(errors);
