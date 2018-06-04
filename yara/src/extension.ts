@@ -6,6 +6,7 @@ import { YaraDefinitionProvider } from "./definitionProvider";
 import { YaraReferenceProvider } from "./referenceProvider";
 import { CompileRule } from "./diagnostics";
 
+
 export function activate(context: vscode.ExtensionContext) {
     // console.log("Activating Yara extension");
     const YARA: vscode.DocumentSelector = { language: "yara", scheme: "file" };

@@ -1,7 +1,7 @@
 "use strict";
 
 import * as vscode from "vscode";
-import {GetRuleRange, varFirstChar} from "./helpers";
+import { GetRuleRange, varFirstChar } from "./helpers";
 
 
 export class YaraReferenceProvider implements vscode.ReferenceProvider {

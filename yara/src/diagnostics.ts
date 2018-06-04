@@ -4,6 +4,7 @@ import * as proc from "child_process";
 import * as tmp from "tempy";
 import * as vscode from "vscode";
 
+
 /*
     Compile the current file in the VSCode workspace as a YARA rule
     :doc: The current workspace document to draw diagnostics data on
