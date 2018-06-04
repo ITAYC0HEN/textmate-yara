@@ -46,7 +46,7 @@
                     ],
                     "default": null,
                     "scope": "resource",
-                    "description": "Filepath leading to the yarac binary. Absolute paths are preferred, and no trailing slashes."
+                    "description": "Filepath leading to the yarac binary. Can be a directory or a filename. Absolute paths are preferred, and no trailing slashes."
                 },
                 "yara.compile_flags": {
                     "type": [
