@@ -323,7 +323,7 @@ suite("YARA: Configuration", function () {
         });
     });
 
-    test("install_path failure", function (done) {
+    test.skip("install_path failure", function (done) {
         // set the install_path to the yarac binary
         // compile the failed file and make sure the same is returned as if yarac is in the $PATH
         const filepath: string = path.join(workspace, "compile_fail.yara");
@@ -345,7 +345,7 @@ suite("YARA: Configuration", function () {
         });
     });
 
-    test("compile_flags success", function (done) {
+    test.skip("compile_flags success", function (done) {
         // compile the warnings file and make sure nothing is returned
         const filepath: string = path.join(workspace, "compile_warn.yara");
         vscode.workspace.openTextDocument(filepath).then(function (doc) {
@@ -361,7 +361,7 @@ suite("YARA: Configuration", function () {
         });
     });
 
-    test("compile_flags failure", function (done) {
+    test.skip("compile_flags failure", function (done) {
         // compile the warnings file with a flag that doesn't exist and make sure VSCode doesn't shit the bed
         const filepath: string = path.join(workspace, "compile_warn.yara");
         vscode.workspace.openTextDocument(filepath).then(function (doc) {
