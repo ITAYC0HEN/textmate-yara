@@ -1,6 +1,6 @@
 "use strict";
 
-import { stat } from "fs";
+import { statSync } from "fs";
 import * as proc from "child_process";
 import * as tmp from "tempy";
 import * as vscode from "vscode";
@@ -28,11 +28,11 @@ export function CompileRule(doc: vscode.TextDocument | null, diagnosticCollectio
     // use user's installation path if one exists, else assume "yarac" is available in the $PATH
     let compilerPath: string = "yarac";
     if (config.get("install_path") !== null) {
-        stat(config.get("install_path"), function(err, stats) {
-            if (stats.isFile()) { compilerPath = config.get("install_path");}
-            else if (stats.isDirectory()) { compilerPath = `${config.get("install_path")}/yarac`; }
-        });
+        const stats = statSync(config.get("install_path"));
+        if (stats.isFile()) { compilerPath = config.get("install_path"); }
+        else if (stats.isDirectory()) { compilerPath = `${config.get("install_path")}/yarac`; }
     }
+    // console.log(`YARA install path: ${compilerPath}`);
     const compileFlags: string | null | Array<string> = config.get("compile_flags");
     const ofile = tmp.file({ extension: "yarac" });
     let flags: Array<string>;
