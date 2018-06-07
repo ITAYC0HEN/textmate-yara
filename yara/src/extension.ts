@@ -14,10 +14,18 @@ export function activate(context: vscode.ExtensionContext) {
     let referenceDisposable: vscode.Disposable = vscode.languages.registerReferenceProvider(YARA, new YaraReferenceProvider());
     let completionDisposable: vscode.Disposable = vscode.languages.registerCompletionItemProvider(YARA, new YaraCompletionItemProvider(), '.');
     let diagnosticCollection: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection('yara');
-    let compileCommand: vscode.Disposable = vscode.commands.registerCommand("yara.CompileRule",
-        function (doc?: vscode.TextDocument | null) {
-            return CompileRule(doc, diagnosticCollection);
+    let compileCommand: vscode.Disposable = vscode.commands.registerCommand("yara.CompileRule", function (doc?: vscode.TextDocument | null) {
+       return CompileRule(doc, diagnosticCollection);
+    });
+    let compileAllCommand: vscode.Disposable = vscode.commands.registerCommand("yara.CompileAllRules", function () {
+        const glob: vscode.GlobPattern = "**/*.{yara,yar}"
+        vscode.workspace.findFiles(glob, null, 100).then(function (results: vscode.Uri[]) {
+            console.log(`findFiles result: ${JSON.stringify(results)}`);
+            results.forEach(uri => {
+                
+            });
         });
+    });
     let saveSubscription: vscode.Disposable = vscode.workspace.onDidSaveTextDocument(function () {
         let fileUri: vscode.Uri = vscode.window.activeTextEditor.document.uri;
         let localConfig: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("yara", fileUri);
@@ -34,6 +42,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(completionDisposable);
     context.subscriptions.push(diagnosticCollection);
     context.subscriptions.push(compileCommand);
+    context.subscriptions.push(compileAllCommand);
     context.subscriptions.push(saveSubscription);
 };
 
