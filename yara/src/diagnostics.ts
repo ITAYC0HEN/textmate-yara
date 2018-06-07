@@ -1,10 +1,25 @@
 "use strict";
 
-import { statSync } from "fs";
 import * as proc from "child_process";
+import { statSync } from "fs";
 import * as tmp from "tempy";
 import * as vscode from "vscode";
 
+let compilerPath: string = "yarac";
+
+/*
+    Update the path to the compiler
+    :doc: The current workspace document to get the configuration for
+*/
+function UpdateCompilerPath(install_path) {
+    // use user's installation path if one exists, else assume "yarac" is available in the $PATH
+    if (install_path !== null) {
+        const stats = statSync(install_path);
+        if (stats.isFile()) { compilerPath = install_path; }
+        else if (stats.isDirectory()) { compilerPath = `${install_path}/yarac`; }
+    }
+    console.log(`YARA install path: ${compilerPath}`);
+}
 
 /*
     Compile the current file in the VSCode workspace as a YARA rule
@@ -25,14 +40,7 @@ export function CompileRule(doc: vscode.TextDocument | null, diagnosticCollectio
         return new Promise((resolve, reject) => { reject(null); });
     }
     const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("yara", doc.uri);
-    // use user's installation path if one exists, else assume "yarac" is available in the $PATH
-    let compilerPath: string = "yarac";
-    if (config.get("install_path") !== null) {
-        const stats = statSync(config.get("install_path"));
-        if (stats.isFile()) { compilerPath = config.get("install_path"); }
-        else if (stats.isDirectory()) { compilerPath = `${config.get("install_path")}/yarac`; }
-    }
-    // console.log(`YARA install path: ${compilerPath}`);
+    UpdateCompilerPath(config.get("install_path"));
     const compileFlags: string | null | Array<string> = config.get("compile_flags");
     const ofile = tmp.file({ extension: "yarac" });
     let flags: Array<string>;
