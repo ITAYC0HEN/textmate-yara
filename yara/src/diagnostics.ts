@@ -18,7 +18,7 @@ function UpdateCompilerPath(install_path) {
         if (stats.isFile()) { compilerPath = install_path; }
         else if (stats.isDirectory()) { compilerPath = `${install_path}/yarac`; }
     }
-    console.log(`YARA install path: ${compilerPath}`);
+    // console.log(`YARA install path: ${compilerPath}`);
 }
 
 /*
@@ -98,7 +98,7 @@ export function CompileRule(fileUri: vscode.Uri | null, diagnosticCollection: vs
             if (diagnostic_errors == 0 && errors == null) {
                 // status bar message goes away after 3 seconds
                 vscode.window.setStatusBarMessage("File compiled successfully!", 3000);
-                console.log("File compiled successfully!");
+                // console.log("File compiled successfully!");
             }
             diagnosticCollection.set(fileUri, diagnostics);
             resolve(diagnostics);
