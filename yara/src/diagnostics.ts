@@ -40,11 +40,14 @@ export function CompileRule(fileUri: vscode.Uri | null, diagnosticCollection: vs
     }
     else if (fileUri instanceof vscode.Uri) {
         vscode.workspace.openTextDocument(fileUri).then(function (result: vscode.TextDocument) {
+            // technically, there's a lag here that could cause problems if it takes
+            // longer to open this document than to reach the ParseOutput() call below
+            // but, given a subprocess needs to be created, that probably won't happen
             doc = result;
+            if (doc.languageId != "yara") {
+                return new Promise((resolve, reject) => { reject(null); });
+            }
         });
-    }
-    if (doc.languageId != "yara") {
-        return new Promise((resolve, reject) => { reject(null); });
     }
     const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("yara", fileUri);
     UpdateCompilerPath(config.get("install_path"));
