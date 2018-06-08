@@ -23,7 +23,7 @@ function UpdateCompilerPath(install_path) {
 
 /*
     Compile the current file in the VSCode workspace as a YARA rule
-    :file: A file or text document to draw diagnotics on. If none set, default to the active editor
+    :fileUri: A Uri of a file or text document to draw diagnotics on. If none set, default to the active editor
     :diagnosticCollection: Set of diagnostics data for VSCode to draw on the screen
 */
 export function CompileRule(fileUri: vscode.Uri | null, diagnosticCollection: vscode.DiagnosticCollection) {
