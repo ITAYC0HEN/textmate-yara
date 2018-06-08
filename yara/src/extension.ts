@@ -14,15 +14,17 @@ export function activate(context: vscode.ExtensionContext) {
     let referenceDisposable: vscode.Disposable = vscode.languages.registerReferenceProvider(YARA, new YaraReferenceProvider());
     let completionDisposable: vscode.Disposable = vscode.languages.registerCompletionItemProvider(YARA, new YaraCompletionItemProvider(), '.');
     let diagnosticCollection: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection('yara');
-    let compileCommand: vscode.Disposable = vscode.commands.registerCommand("yara.CompileRule", function (doc?: vscode.TextDocument | null) {
-       return CompileRule(doc, diagnosticCollection);
+    let compileCommand: vscode.Disposable = vscode.commands.registerCommand("yara.CompileRule", function (fileUri?: vscode.Uri | null) {
+        return CompileRule(fileUri, diagnosticCollection);
     });
     let compileAllCommand: vscode.Disposable = vscode.commands.registerCommand("yara.CompileAllRules", function () {
         const glob: vscode.GlobPattern = "**/*.{yara,yar}"
         vscode.workspace.findFiles(glob, null, 100).then(function (results: vscode.Uri[]) {
-            console.log(`findFiles result: ${JSON.stringify(results)}`);
-            results.forEach(uri => {
-                
+            results.forEach(fileUri => {
+                console.log(`Compiling ${fileUri.fsPath}`);
+                CompileRule(fileUri, diagnosticCollection).catch(function (err: string) {
+                    console.log(err);
+                });
             });
         });
     });

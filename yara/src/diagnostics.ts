@@ -23,11 +23,12 @@ function UpdateCompilerPath(install_path) {
 
 /*
     Compile the current file in the VSCode workspace as a YARA rule
-    :doc: The current workspace document to draw diagnostics data on
+    :file: A file or text document to draw diagnotics on. If none set, default to the active editor
     :diagnosticCollection: Set of diagnostics data for VSCode to draw on the screen
 */
-export function CompileRule(doc: vscode.TextDocument | null, diagnosticCollection: vscode.DiagnosticCollection) {
-    if (!doc) {
+export function CompileRule(fileUri: vscode.Uri | null, diagnosticCollection: vscode.DiagnosticCollection) {
+    let doc: vscode.TextDocument = null;
+    if (!fileUri) {
         const editor: vscode.TextEditor = vscode.window.activeTextEditor;
         if (!editor) {
             vscode.window.showErrorMessage("Couldn't get the active text editor");
@@ -35,29 +36,35 @@ export function CompileRule(doc: vscode.TextDocument | null, diagnosticCollectio
             return new Promise((resolve, reject) => { reject(null); });
         }
         doc = editor.document;
+        fileUri = doc.uri;
+    }
+    else if (fileUri instanceof vscode.Uri) {
+        vscode.workspace.openTextDocument(fileUri).then(function (result: vscode.TextDocument) {
+            doc = result;
+        });
     }
     if (doc.languageId != "yara") {
         return new Promise((resolve, reject) => { reject(null); });
     }
-    const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("yara", doc.uri);
+    const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("yara", fileUri);
     UpdateCompilerPath(config.get("install_path"));
-    const compileFlags: string | null | Array<string> = config.get("compile_flags");
+    const compileFlags: string | null | Array<string> = config.get("compile_flags", null);
     const ofile = tmp.file({ extension: "yarac" });
     let flags: Array<string>;
     if (compileFlags && typeof compileFlags === "string") {
-        flags = [compileFlags, doc.fileName, ofile];
+        flags = [compileFlags, fileUri.fsPath, ofile];
     }
     else if (compileFlags && compileFlags instanceof Array) {
-        flags = [compileFlags.join(" "), doc.fileName, ofile];
+        flags = [compileFlags.join(" "), fileUri.fsPath, ofile];
     }
     else {
-        flags = [doc.fileName, ofile];
+        flags = [fileUri.fsPath, ofile];
     }
     let diagnostics: Array<vscode.Diagnostic> = [];
 
     return new Promise((resolve, reject) => {
         const result: proc.ChildProcess = proc.spawn(compilerPath, flags);
-        // console.log(`Attempting to compile ${doc.fileName} with flags: ${flags}`);
+        // console.log(`Attempting to compile ${fileUri.fsPath} with flags: ${flags}`);
         let errors: string | null = null;
         let diagnostic_errors: number = 0;
         result.stderr.on('data', (data) => {
@@ -88,9 +95,9 @@ export function CompileRule(doc: vscode.TextDocument | null, diagnosticCollectio
             if (diagnostic_errors == 0 && errors == null) {
                 // status bar message goes away after 3 seconds
                 vscode.window.setStatusBarMessage("File compiled successfully!", 3000);
-                // console.log("File compiled successfully!");
+                console.log("File compiled successfully!");
             }
-            diagnosticCollection.set(vscode.Uri.file(doc.fileName), diagnostics);
+            diagnosticCollection.set(fileUri, diagnostics);
             resolve(diagnostics);
         });
     });
