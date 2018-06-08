@@ -293,6 +293,15 @@ suite("YARA: Commands", function () {
             });
         });
     });
+
+    test("CompileAllRules", function (done) {
+        const filepath: string = path.join(workspace, "compile_success.yara");
+        vscode.workspace.openTextDocument(filepath).then(function (doc: vscode.TextDocument) {
+            vscode.commands.executeCommand("yara.CompileAllRules").then(function (diagnostics: Array<vscode.Diagnostic>) {
+                console.log(diagnostics);
+            });
+        });
+    });
 });
 
 suite("YARA: Configuration", function () {
