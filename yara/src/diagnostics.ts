@@ -11,12 +11,12 @@ let compilerPath: string = "yarac";
     Update the path to the compiler
     :doc: The current workspace document to get the configuration for
 */
-function UpdateCompilerPath(install_path) {
+export function UpdateCompilerPath(install_path) {
     // use user's installation path if one exists, else assume "yarac" is available in the $PATH
     if (install_path !== null) {
         const stats = statSync(install_path);
         if (stats.isFile()) { compilerPath = install_path; }
-        else if (stats.isDirectory()) { compilerPath = `${install_path}/yarac`; }
+        else if (stats.isDirectory()) { compilerPath = `${install_path}yarac`; }
     }
     // console.log(`YARA install path: ${compilerPath}`);
 }
@@ -50,7 +50,6 @@ export function CompileRule(fileUri: vscode.Uri | null, diagnosticCollection: vs
         });
     }
     const config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("yara", fileUri);
-    UpdateCompilerPath(config.get("install_path"));
     const compileFlags: string | null | Array<string> = config.get("compile_flags", null);
     const ofile = tmp.file({ extension: "yarac" });
     let flags: Array<string>;
