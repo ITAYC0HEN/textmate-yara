@@ -4,7 +4,7 @@ import * as vscode from "vscode";
 import { YaraCompletionItemProvider } from "./completionProvider";
 import { YaraDefinitionProvider } from "./definitionProvider";
 import { YaraReferenceProvider } from "./referenceProvider";
-import { CompileRule } from "./diagnostics";
+import { CompileRule, UpdateCompilerPath } from "./diagnostics";
 
 
 export function activate(context: vscode.ExtensionContext) {
@@ -21,7 +21,7 @@ export function activate(context: vscode.ExtensionContext) {
         const glob: vscode.GlobPattern = "**/*.{yara,yar}"
         vscode.workspace.findFiles(glob, null, 100).then(function (results: vscode.Uri[]) {
             results.forEach(fileUri => {
-                console.log(`Compiling ${fileUri.fsPath}`);
+                // console.log(`Compiling ${fileUri.fsPath}`);
                 CompileRule(fileUri, diagnosticCollection).catch(function (err: string) {
                     console.log(err);
                 });
@@ -38,6 +38,11 @@ export function activate(context: vscode.ExtensionContext) {
                 }
             });
         }
+    });
+    let configSubscription: vscode.Disposable = vscode.workspace.onDidChangeConfiguration(function () {
+        let fileUri: vscode.Uri = vscode.window.activeTextEditor.document.uri;
+        let localConfig: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("yara", fileUri);
+        UpdateCompilerPath(localConfig.get("install_path"));
     });
     context.subscriptions.push(definitionDisposable);
     context.subscriptions.push(referenceDisposable);
