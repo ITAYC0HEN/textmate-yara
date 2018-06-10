@@ -269,15 +269,22 @@ suite("YARA: Diagnostics", function () {
     test("compile warning", function (done) {
         const filepath: string = path.join(workspace, "compile_warn.yara");
         vscode.workspace.openTextDocument(filepath).then(function (doc) {
-            CompileRule(doc.uri, diagnosticCollection).then(function (diagnostics: Array<vscode.Diagnostic>) {
-                if (diagnostics.length == 1) {
-                    if (diagnostics[0].severity == vscode.DiagnosticSeverity.Warning) {
-                        if (diagnostics[0].range.start.line == 9 && diagnostics[0].range.end.line == 9) {
-                            done();
+            let config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("yara", doc.uri);
+            const old_compile_flags: string | null | Array<string> = config.get("compile_flags");
+            // set the compile_flags to exclude warnings
+            config.update("compile_flags", null, true).then(function () {
+                CompileRule(doc.uri, diagnosticCollection).then(function (diagnostics: Array<vscode.Diagnostic>) {
+                    if (diagnostics.length == 1) {
+                        if (diagnostics[0].severity == vscode.DiagnosticSeverity.Warning) {
+                            if (diagnostics[0].range.start.line == 9 && diagnostics[0].range.end.line == 9) {
+                                done();
+                            }
                         }
                     }
-                }
+                });
             });
+            // reset the compile_flags
+            config.update("compile_flags", old_compile_flags, true);
         });
     });
 });
@@ -298,7 +305,7 @@ suite("YARA: Commands", function () {
         const filepath: string = path.join(workspace, "compile_success.yara");
         vscode.workspace.openTextDocument(filepath).then(function (doc: vscode.TextDocument) {
             vscode.commands.executeCommand("yara.CompileAllRules").then(function (diagnostics: Array<vscode.Diagnostic>) {
-                console.log(diagnostics);
+                console.log(`CompileAllRules diagnostics: ${diagnostics}`);
             });
         });
     });
@@ -309,83 +316,88 @@ suite("YARA: Configuration", function () {
         // compile the failed file and make sure the same is returned as if yarac is in the $PATH
         const filepath: string = path.join(workspace, "compile_fail.yara");
         vscode.workspace.openTextDocument(filepath).then(function (doc) {
-            // let config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("yara", doc.uri);
-            // const old_install_path: string | null = config.get("install_path");
-            // config.update("install_path", null, null);
-            CompileRule(doc.uri, diagnosticCollection).then(function (diagnostics: Array<vscode.Diagnostic>) {
-                let passed: boolean = false;
-                if (diagnostics.length == 2) {
-                    diagnostics.forEach(function (diagnostic) {
-                        if (diagnostic.severity == vscode.DiagnosticSeverity.Error) {
-                            if (diagnostic.range.start.line == 8 && diagnostic.range.end.line == 8) {
-                                passed = true;
-                                return;
+            let config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("yara", doc.uri);
+            const old_install_path: string | null = config.get("install_path");
+            // set the install_path to the yarac binary pointed to in $PATH
+            config.update("install_path", null, true).then(function () {
+                CompileRule(doc.uri, diagnosticCollection).then(function (diagnostics: Array<vscode.Diagnostic>) {
+                    let passed: boolean = false;
+                    if (diagnostics.length == 2) {
+                        diagnostics.forEach(function (diagnostic) {
+                            if (diagnostic.severity == vscode.DiagnosticSeverity.Error) {
+                                if (diagnostic.range.start.line == 8 && diagnostic.range.end.line == 8) {
+                                    passed = true;
+                                    return;
+                                }
                             }
-                        }
-                        passed = false;
-                    });
-                }
-                if (passed) { done(); }
+                            passed = false;
+                        });
+                    }
+                    if (passed) { done(); }
+                });
             });
             // reset the install_path
-            // config.update("install_path", old_install_path, null);
+            config.update("install_path", old_install_path, true);
         });
     });
 
-    test.skip("install_path failure", function (done) {
+    test("install_path failure", function (done) {
         // set the install_path to the yarac binary
         // compile the failed file and make sure the same is returned as if yarac is in the $PATH
         const filepath: string = path.join(workspace, "compile_fail.yara");
         vscode.workspace.openTextDocument(filepath).then(function (doc) {
-            // let config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("yara", doc.uri);
-            // const old_install_path: string | null = config.get("install_path");
-            // set the install_path to the yarac binary
-            // config.update("install_path", `${process.env.APPDATA}\\DoesntExist`, null);
-            CompileRule(doc.uri, diagnosticCollection).then(function (diagnostics: Array<vscode.Diagnostic>) {
-                // if CompileRule completes then something went wrong
-            }).catch(function (error: string) {
-                // we got the appropriate error. Yay!
-                if (error == "Cannot compile YARA rule. Please specify an install path and reload the window") {
-                    done();
-                }
+            let config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("yara", doc.uri);
+            const old_install_path: string | null = config.get("install_path");
+            // set the install_path to a non-existant yarac binary
+            config.update("install_path", `${process.env.APPDATA}\\DoesntExist`, true).then(function () {
+                CompileRule(doc.uri, diagnosticCollection).then(function (diagnostics: Array<vscode.Diagnostic>) {
+                    // if CompileRule completes then something went wrong
+                }).catch(function (error: string) {
+                    // we got the appropriate error. Yay!
+                    if (error == "Cannot compile YARA rule. Please specify an install path and reload the window") {
+                        done();
+                    }
+                });
             });
             // reset the install_path
-            // config.update("install_path", old_install_path, null);
+            config.update("install_path", old_install_path, true);
         });
     });
 
-    test.skip("compile_flags success", function (done) {
+    test("compile_flags success", function (done) {
         // compile the warnings file and make sure nothing is returned
         const filepath: string = path.join(workspace, "compile_warn.yara");
         vscode.workspace.openTextDocument(filepath).then(function (doc) {
-            // let config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("yara", doc.uri);
-            // const old_compile_flags: string | null | Array<string> = config.get("compile_flags");
+            let config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("yara", doc.uri);
+            const old_compile_flags: string | null | Array<string> = config.get("compile_flags");
             // set the compile_flags to exclude warnings
-            // config.update("compile_flags", "--no-warnings", null);
-            CompileRule(doc.uri, diagnosticCollection).then(function (diagnostics: Array<vscode.Diagnostic>) {
-                if (diagnostics.length == 0) { done(); }
+            config.update("compile_flags", "--no-warnings", true).then(function () {
+                CompileRule(doc.uri, diagnosticCollection).then(function (diagnostics: Array<vscode.Diagnostic>) {
+                    if (diagnostics.length == 0) { done(); }
+                });
             });
             // reset the compile_flags
-            // config.update("compile_flags", old_compile_flags, null);
+            config.update("compile_flags", old_compile_flags, true);
         });
     });
 
-    test.skip("compile_flags failure", function (done) {
+    test("compile_flags failure", function (done) {
         // compile the warnings file with a flag that doesn't exist and make sure VSCode doesn't shit the bed
         const filepath: string = path.join(workspace, "compile_warn.yara");
         vscode.workspace.openTextDocument(filepath).then(function (doc) {
-            // let config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("yara", doc.uri);
-            // const old_compile_flags: string | null | Array<string> = config.get("compile_flags");
+            let config: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("yara", doc.uri);
+            const old_compile_flags: string | null | Array<string> = config.get("compile_flags");
             // set the compile_flags to exclude warnings
-            // config.update("compile_flags", "--catfacts", false);
-            CompileRule(doc.uri, diagnosticCollection).then(function (diagnostics: Array<vscode.Diagnostic>) {
-                if (diagnostics.length == 0) { done(); }
-            }).catch(function(error: string) {
-                // we got the appropriate error. Yay!
-                if (error.startsWith("unknown option ")) { done(); }
+            config.update("compile_flags", "--catfacts", true).then(function () {
+                CompileRule(doc.uri, diagnosticCollection).then(function (diagnostics: Array<vscode.Diagnostic>) {
+                    if (diagnostics.length == 0) { done(); }
+                }).catch(function(error: string) {
+                    // we got the appropriate error. Yay!
+                    if (error.startsWith("unknown option ")) { done(); }
+                });
+                // reset the compile_flags
+                config.update("compile_flags", old_compile_flags, true);
             });
-            // reset the compile_flags
-            // config.update("compile_flags", old_compile_flags, false);
         });
     });
 });
