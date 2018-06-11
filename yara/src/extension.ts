@@ -18,7 +18,7 @@ export function activate(context: vscode.ExtensionContext) {
         return CompileRule(fileUri, diagnosticCollection);
     });
     let compileAllCommand: vscode.Disposable = vscode.commands.registerCommand("yara.CompileAllRules", function () {
-        const glob: vscode.GlobPattern = "**/*.{yara,yar}"
+        const glob: vscode.GlobPattern = "**/*.{yara,yar}";
         vscode.workspace.findFiles(glob, null, 100).then(function (results: vscode.Uri[]) {
             results.forEach(fileUri => {
                 // console.log(`Compiling ${fileUri.fsPath}`);
