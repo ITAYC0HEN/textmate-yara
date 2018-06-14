@@ -53,6 +53,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(compileCommand);
     context.subscriptions.push(compileAllCommand);
     context.subscriptions.push(saveSubscription);
+    context.subscriptions.push(configSubscription);
 };
 
 export function deactivate(context: vscode.ExtensionContext) {
