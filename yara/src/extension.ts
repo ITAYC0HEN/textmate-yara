@@ -29,14 +29,16 @@ export function activate(context: vscode.ExtensionContext) {
         });
     });
     let saveSubscription: vscode.Disposable = vscode.workspace.onDidSaveTextDocument(function () {
-        let fileUri: vscode.Uri = vscode.window.activeTextEditor.document.uri;
-        let localConfig: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("yara", fileUri);
-        if (localConfig.get("compile_on_save")) {
-            CompileRule(null, diagnosticCollection).catch(function (err: string) {
-                if (err.startsWith("Cannot compile YARA rule")) {
-                    localConfig.update("compile_on_save", false);
-                }
-            });
+        if (vscode.window.activeTextEditor.document.languageId == "yara") {
+            let fileUri: vscode.Uri = vscode.window.activeTextEditor.document.uri;
+            let localConfig: vscode.WorkspaceConfiguration = vscode.workspace.getConfiguration("yara", fileUri);
+            if (localConfig.get("compile_on_save")) {
+                CompileRule(null, diagnosticCollection).catch(function (err: string) {
+                    if (err.startsWith("Cannot compile YARA rule")) {
+                        localConfig.update("compile_on_save", false);
+                    }
+                });
+            }
         }
     });
     let configSubscription: vscode.Disposable = vscode.workspace.onDidChangeConfiguration(function () {
