@@ -13,7 +13,7 @@ export function activate(context: vscode.ExtensionContext) {
     let definitionDisposable: vscode.Disposable = vscode.languages.registerDefinitionProvider(YARA, new YaraDefinitionProvider());
     let referenceDisposable: vscode.Disposable = vscode.languages.registerReferenceProvider(YARA, new YaraReferenceProvider());
     let completionDisposable: vscode.Disposable = vscode.languages.registerCompletionItemProvider(YARA, new YaraCompletionItemProvider(), '.');
-    let diagnosticCollection: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection('yara');
+    let diagnosticCollection: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection("yara");
     let compileCommand: vscode.Disposable = vscode.commands.registerCommand("yara.CompileRule", function (fileUri?: vscode.Uri | null) {
         return CompileRule(fileUri, diagnosticCollection);
     });

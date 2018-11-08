@@ -14,7 +14,7 @@ import { CompileRule } from "../yara/src/diagnostics";
 
 
 let workspace = path.join(__dirname, "..", "..", "test/rules/");
-let diagnosticCollection: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection('yara');
+let diagnosticCollection: vscode.DiagnosticCollection = vscode.languages.createDiagnosticCollection("yara");
 
 suite("YARA: Provider", function () {
     test("rule definition", function (done) {
